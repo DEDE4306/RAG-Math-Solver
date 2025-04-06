@@ -1,0 +1,27 @@
+name,formula,latex
+正方形面积,S = a^2,$S = a^2$
+正方形周长,P = 4a,$P = 4a$
+长方形面积,S = ab,$S = ab$
+长方形周长,P = 2(a + b),$P = 2(a + b)$
+三角形面积,S = 1/2 ab sin(C),$S = \frac{1}{2} ab \sin C$
+圆的周长,C = 2πr,$C = 2\pi r$
+圆的面积,S = πr^2,$S = \pi r^2$
+一元二次方程求根公式,x = (-b ± sqrt(b² - 4ac)) / 2a,$x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$
+判别式,Δ = b² - 4ac,$\Delta = b^2 - 4ac$
+平方差公式,a² - b² = (a - b)(a + b),$a^2 - b^2 = (a - b)(a + b)$
+完全平方公式,a² ± 2ab + b² = (a ± b)²,$a^2 \pm 2ab + b^2 = (a \pm b)^2$
+勾股定理,a² + b² = c²,$a^2 + b^2 = c^2$
+三角形内角和,180°,$180^\circ$
+正弦定理,a/sinA = b/sinB = c/sinC,$\frac{a}{\sin A} = \frac{b}{\sin B} = \frac{c}{\sin C}$
+余弦定理,c² = a² + b² - 2ab cosC,$c^2 = a^2 + b^2 - 2ab \cos C$
+三角恒等式1,sin²x + cos²x = 1,$\sin^2 x + \cos^2 x = 1$
+三角恒等式2,1 + tan²x = sec²x,$1 + \tan^2 x = \sec^2 x$
+三角恒等式3,1 + cot²x = csc²x,$1 + \cot^2 x = \csc^2 x$
+对数恒等式1,log_a(MN) = log_a M + log_a N,$\log_a (MN) = \log_a M + \log_a N$
+对数恒等式2,log_a(M/N) = log_a M - log_a N,$\log_a \left(\frac{M}{N}\right) = \log_a M - \log_a N$
+对数恒等式3,log_a(M^n) = n log_a M,$\log_a M^n = n \log_a M$
+指数恒等式,a^{m+n} = a^m * a^n,$a^{m+n} = a^m \cdot a^n$
+等差数列通项,a_n = a₁ + (n - 1)d,$a_n = a_1 + (n - 1)d$
+等差数列前n项和,S_n = n/2 (a₁ + a_n),$S_n = \frac{n}{2}(a_1 + a_n)$
+等比数列通项,a_n = a₁ * q^{n - 1},$a_n = a_1 \cdot q^{n - 1}$
+等比数列前n项和,S_n = a₁ (1 - q^n) / (1 - q),"$S_n = a_1 \cdot \frac{1 - q^n}{1 - q},\ q \neq 1$"
