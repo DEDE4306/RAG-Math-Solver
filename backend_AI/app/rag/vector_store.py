@@ -1,37 +1,28 @@
-# vector_store.py
+# viewer.py
 import faiss
-import os
-import numpy as np
 import pickle
+import numpy as np
+from embedder import Embedder
 
-class VectorStore:
-    def __init__(self, dim, index_path="faiss_index.index", meta_path="metadata.pkl"):
-        self.index_path = index_path
-        self.meta_path = meta_path
-        self.index = faiss.IndexFlatL2(dim)  # 用于基本 L2 相似度检索
-        self.metadata = []
+# 初始化 embedder（使用 GPU）
+embedder = Embedder()
 
-        if os.path.exists(index_path) and os.path.exists(meta_path):
-            self.load()
+# 读取 FAISS 索引
+index = faiss.read_index("try.index")
 
-    def add(self, vectors, metas):
-        self.index.add(vectors)
-        self.metadata.extend(metas)
+# 读取对应文本
+with open("try_texts.pkl", "rb") as f:
+    texts = pickle.load(f)
 
-    def search(self, query_vector, top_k=5):
-        D, I = self.index.search(query_vector, top_k)
-        results = []
-        for idx in I[0]:
-            if idx < len(self.metadata):
-                results.append(self.metadata[idx])
-        return results
+# 打印基本信息
+print(f"Index total vectors: {index.ntotal}")
+print(f"Loaded {len(texts)} texts.")
 
-    def save(self):
-        faiss.write_index(self.index, self.index_path)
-        with open(self.meta_path, 'wb') as f:
-            pickle.dump(self.metadata, f)
+# 输出所有向量及对应文本
+for i in range(index.ntotal):
+    vector = index.reconstruct(i)  # 获取第 i 个向量
+    text = texts[i]
 
-    def load(self):
-        self.index = faiss.read_index(self.index_path)
-        with open(self.meta_path, 'rb') as f:
-            self.metadata = pickle.load(f)
+    print(f"\n🔢 Index {i}")
+    print(f"Text: {text}")
+    print(f"ector (dim={len(vector)}): {vector[:10]}...")  # 只显示前10维，太长会刷屏
