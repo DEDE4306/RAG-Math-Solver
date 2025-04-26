@@ -3,7 +3,7 @@ import Home from '@/views/Home.vue'
 import LoginPageWithPw from '@/views/LoginPageWithPw.vue'
 import LoginPageWithCode from '@/views/LoginPageWithCode.vue'
 import RegisterPage from '@/views/RegisterPage.vue'
-import ChangePassword from '@/components/ChangePassword.vue'
+import ChatComponent from '@/components/ChatComponent.vue'
 
 const routes = [
     {
@@ -27,9 +27,9 @@ const routes = [
         component: RegisterPage
     },
     {
-        path: '/change1',
-        name: 'ChangePassword',
-        component: ChangePassword
+        path: '/chat',
+        name: 'ChatComponent',
+        component: ChatComponent
     }
 ]
 
