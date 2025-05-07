@@ -1,4 +1,5 @@
-# viewer.py
+# rag/viewer.py
+# 可以通过这个代码看到我存储的向量
 from faiss_indexer import FaissIndexer
 
 # 创建 indexer 并加载

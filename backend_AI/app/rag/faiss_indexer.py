@@ -1,9 +1,10 @@
+# rag/faiss_indexer.py
 import faiss
 import numpy as np
 import os
 import pickle
 
-
+# 用于操作向量化数据集
 class FaissIndexer:
     def __init__(self, dim=None, index_path='faiss.index', texts_path='texts.pkl'):
         """
@@ -41,9 +42,13 @@ class FaissIndexer:
         # 加载索引文件和文本文件
         if os.path.exists(self.index_path):
             self.index = faiss.read_index(self.index_path)
+        else:
+            print("未找到 index 文件")
         if os.path.exists(self.texts_path):
             with open(self.texts_path, 'rb') as f:
                 self.texts = pickle.load(f)
+        else:
+            print("未找到文本文件")
 
     def search(self, query_vector, k=5):
         if self.index is None:
