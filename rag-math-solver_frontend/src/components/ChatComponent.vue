@@ -1,8 +1,7 @@
 <template>
     <div class="chat-app">
-        <h1> {{ sessionAbstract }} </h1>
+        <h1>{{ sessionTitle }}</h1>
         <div class="chat-container">
-            <!-- 消息列表 -->
             <div class="message-list" ref="messageList">
                 <div 
                     v-for="message in messages" 
@@ -16,17 +15,16 @@
                 </div>
             </div>
         
-            <!-- 输入框 -->
             <div class="input-area">
                 <textarea
-                v-model="newMessage"
-                @keydown.enter.exact.prevent="sendMessage"
-                placeholder="输入消息..."
-                rows="1"
-                ref="textarea"
+                    v-model="newMessage"
+                    @keydown.enter.exact.prevent="sendMessage"
+                    placeholder="输入消息..."
+                    rows="1"
+                    ref="textarea"
                 ></textarea>
                 <img
-                    src = "@/../public/send.png"
+                    src="@/../public/send.png"
                     class="send-button"
                     @click="sendMessage"
                     alt="发送"
@@ -39,142 +37,200 @@
 <script>
 import { nextTick } from 'vue';
 import axios from 'axios';
+  
 export default {
+    props: {
+        sessionId: {
+            type: [String, Number, null],
+            default: null
+        },
+        sessionTitle: {
+            type: String,
+            default: '新对话'
+        }
+    },
     data() {
         return {
-            sessionAbstract: '标题标题标题标题标题',
             messages: [],
             newMessage: '',
+            isNewSession: false // 初始化 isNewSession
         };
     },
-    created() {
-        this.initLoadingMessages()
+    watch: {
+        sessionId(newVal, oldVal) {
+            console.log('sessionId 变化:', { oldVal, newVal, isNewSession: this.isNewSession });
+            if (!newVal) {
+                console.log('watch 触发 startNewChat');
+                this.startNewChat();
+            }
+            // 移除 loadMessages 调用，依赖 loadSession
+        }
     },
     mounted() {
-        this.scrollToBottom()
+        this.scrollToBottom();
     },
     methods: {
         getCurrentDateTime() {
             const now = new Date();
-      
             const year = now.getFullYear();
             const month = String(now.getMonth() + 1).padStart(2, '0');
             const day = String(now.getDate()).padStart(2, '0');
-      
             const hours = String(now.getHours()).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
             const seconds = String(now.getSeconds()).padStart(2, '0');
-      
             return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
         },
-        initLoadingMessages() {
+      
+        loadMessages(sessionId) {
+            console.log('loadMessages 调用:', { sessionId, caller: new Error().stack.split('\n')[2] });
+            this.messages = [];
             const token = localStorage.getItem("token");
-            axios.get('http://127.0.0.1:4523/m1/6179108-5871515-default/api/chat/getMessageListBySessionid', {
-                "sessionid": 0
-            }, {
+            axios.get(`http://127.0.0.1:4523/m1/6179108-5871515-default/api/chat/getMessageListBySessionid/${sessionId}`, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 }
             })
             .then(response => {
-                console.log(response.data.response);
+                console.log('getMessageListBySessionid 返回:', response.data);
                 if (response.data.success) {
-                    // 按 createdat 升序排序 response.data.response
                     const sortedMessages = response.data.response.sort((a, b) => {
                         return new Date(a.createdat).getTime() - new Date(b.createdat).getTime();
                     });
-                    // 将排序后的消息添加到 messages
-                    sortedMessages.forEach(message => {
-                        this.messages.push({
-                            messageid: message.messageid,
-                            role: message.role,
-                            content: message.content,
-                            createdat: message.createdat
-                        });
-                    });
-                    // 加载消息后滚动到最底部
+                    this.messages = sortedMessages.map(message => ({
+                        messageid: message.messageid,
+                        role: message.role,
+                        content: message.content,
+                        createdat: message.createdat
+                    }));
                     this.scrollToBottom();
                 } else {
                     alert('获取消息列表失败: ' + response.data.msg);
                 }
             })
             .catch(error => {
-                console.error('请求失败:', error);
+                console.error('getMessageListBySessionid 错误:', error);
                 alert('请求消息列表失败，请检查网络或服务器');
             });
         },
-        // 发送消息
+      
+        startNewChat() {
+            console.log('startNewChat 调用');
+            this.messages = [];
+            this.isNewSession = false;
+        },
+      
         sendMessage() {
             if (this.newMessage.trim() === '') return;
-
-            // 乐观更新：临时添加用户消息
+  
             const tempMessage = {
                 messageid: `user-${Date.now()}`,
                 role: 'user',
                 content: this.newMessage.trim(),
                 createdat: this.getCurrentDateTime(),
-                status: 'pending' // 添加状态
+                status: 'pending'
             };
             this.messages.push(tempMessage);
+            console.log('添加临时消息:', tempMessage);
             this.scrollToBottom();
-
+        
             const token = localStorage.getItem("token");
-            const messageContent = this.newMessage.trim(); // 保存输入内容
+            const messageContent = this.newMessage.trim();
             this.newMessage = '';
-
-            // 模拟服务器延迟（2秒）
+  
             setTimeout(() => {
-            axios.post('http://127.0.0.1:4523/m1/6179108-5871515-default/api/chat/sendMessage', {
-                'sessionid': 0,
-                'content': this.newMessage
-            }, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                }
-            })
-            .then(response => {
-                console.log(response.data.response);
-                if(response.data.success) {
-                    // 移除临时消息
-                    //this.messages = this.messages.filter(msg => msg.messageid !== tempMessage.messageid);
-                    // 更新用户消息状态
-                    const userMessageIndex = this.messages.findIndex(msg => msg.messageid === tempMessage.messageid);
-                        if (userMessageIndex !== -1) {
-                            this.messages[userMessageIndex].status = 'success';
+                if (!this.sessionId) {
+                    // 新会话：调用 createNewSession
+                    this.isNewSession = true;
+                    axios.post('http://127.0.0.1:4523/m1/6179108-5871515-default/api/chat/createNewSession', {
+                        content: messageContent
+                    }, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
                         }
-
-                    this.messages.push({
-                        messageid: response.data.response.messageid,
-                        role: response.data.response.role,
-                        content: response.data.response.content,
-                        createdat: response.data.response.createdat
+                    })
+                    .then(response => {
+                        console.log('createNewSession 返回:', response.data);
+                        if (response.data.success) {
+                            // 移除临时消息
+                            this.messages = this.messages.filter(msg => msg.messageid !== tempMessage.messageid);
+                            // 添加后端返回的消息列表
+                            this.messages = response.data.response.messages.sort((a, b) => {
+                                return new Date(a.createdat).getTime() - new Date(b.createdat).getTime();
+                            });
+                            console.log('更新消息列表:', this.messages);
+                            this.scrollToBottom();
+                            // 通知父组件更新会话信息
+                            this.$emit('update-session', {
+                                sessionId: response.data.response.sessionid,
+                                title: response.data.response.title || '新对话'
+                            });
+                            // 重置 isNewSession
+                            this.isNewSession = false;
+                        } else {
+                            this.isNewSession = false;
+                            this.messages = this.messages.filter(msg => msg.messageid !== tempMessage.messageid);
+                            this.newMessage = messageContent;
+                            alert('创建新对话失败: ' + response.data.msg);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('createNewSession 错误:', error);
+                        this.isNewSession = false;
+                        this.messages = this.messages.filter(msg => msg.messageid !== tempMessage.messageid);
+                        this.newMessage = messageContent;
+                        alert('创建新对话失败，请检查网络或服务器');
                     });
-                    this.scrollToBottom();
                 } else {
-                    // API 返回 success: false
-                    this.messages = this.messages.filter(msg => msg.messageid !== tempMessage.messageid);
-                    this.newMessage = messageContent; // 恢复输入
-                    alert('发送消息失败: ' + response.data.msg);
+                    // 现有会话：调用 sendMessage
+                    axios.post('http://127.0.0.1:4523/m1/6179108-5871515-default/api/chat/sendMessage', {
+                        sessionid: this.sessionId,
+                        content: messageContent
+                    }, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        }
+                    })
+                    .then(response => {
+                        console.log('sendMessage 返回:', response.data);
+                        if (response.data.success) {
+                            const userMessageIndex = this.messages.findIndex(msg => msg.messageid === tempMessage.messageid);
+                            if (userMessageIndex !== -1) {
+                                this.messages[userMessageIndex].status = 'success';
+                            }
+                            this.messages.push({
+                                messageid: response.data.response.messageid,
+                                role: response.data.response.role,
+                                content: response.data.response.content,
+                                createdat: response.data.response.createdat
+                            });
+                            console.log('更新消息列表:', this.messages);
+                            this.scrollToBottom();
+                        } else {
+                            this.messages = this.messages.filter(msg => msg.messageid !== tempMessage.messageid);
+                            this.newMessage = messageContent;
+                            alert('发送消息失败: ' + response.data.msg);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('sendMessage 错误:', error);
+                        this.messages = this.messages.filter(msg => msg.messageid !== tempMessage.messageid);
+                        this.newMessage = messageContent;
+                        alert('发送消息失败，请检查网络或服务器');
+                    });
                 }
-            })
-            .catch(error => {
-                // 网络错误或服务器异常
-                this.messages = this.messages.filter(msg => msg.messageid !== tempMessage.messageid);
-                this.newMessage = messageContent; // 恢复输入
-                console.error('发送消息失败:', error);
-                alert('发送消息失败，请检查网络或服务器');
-            });
-            }, 2000); // 模拟 2 秒延迟          
+            }, 2000);
         },
+      
         scrollToBottom() {
             nextTick(() => {
                 if (this.$refs.messageList) {
                     this.$refs.messageList.scrollTop = this.$refs.messageList.scrollHeight;
                 }
             });
-        },
+        }
     }
 }
 </script>
@@ -185,14 +241,9 @@ html, body, #app, .chat-app {
     padding: 0;
     width: 100%;
     height: 100%;
-    overflow: hidden; /* 禁用所有滚动 */
+    overflow: hidden;
 }
 .chat-app {
-    position: fixed; /* 使用固定定位确保不产生滚动 */
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
     display: flex;
     flex-direction: column;
 }
@@ -211,17 +262,17 @@ h1 {
     margin: 0;
     padding: 0;
     background-color: #ffffff;
-    overflow: hidden; /* 禁用容器内部滚动 */
+    overflow: hidden;
 }
 .message-list {
     flex: 1;
-    overflow-y: auto; /* 只允许消息列表区域滚动 */
+    overflow-y: auto;
     padding: 15px;
     display: flex;
     flex-direction: column;
     gap: 20px;
     width: 100%;
-    margin: 0 auto; /* 水平居中 */
+    margin: 0 auto;
 }
 .message-bubble {
     max-width: 70%;
@@ -264,9 +315,9 @@ h1 {
     padding: 10px;
     background-color: #fff;
     border-radius: 15px;
-    width: 90%; /* 设置宽度为90% */
+    width: 90%;
     height: 67px;
-    margin: 0 auto; /* 水平居中 */
+    margin: 0 auto;
     margin-bottom: 30px;
 }
 textarea {
@@ -281,22 +332,22 @@ textarea {
     font-size: 18px;
 }
 textarea::-webkit-scrollbar {
-    width: 6px; /* 滚动条宽度 */
+    width: 6px;
 }
 textarea::-webkit-scrollbar-button {
-    display: none; /* 隐藏滚动条的箭头按钮 */
+    display: none;
 }
 textarea::-webkit-scrollbar-thumb {
-    background-color: #ccc; /* 滚动条滑块颜色 */
-    border-radius: 15px; /* 与 textarea 的圆角一致 */
+    background-color: #ccc;
+    border-radius: 15px;
 }
 textarea::-webkit-scrollbar-track {
-    background-color: transparent; /* 轨道透明 */
-    border-radius: 15px; /* 与 textarea 的圆角一致 */
-    margin: 2px; /* 添加内边距，避免滚动条紧贴边缘 */
+    background-color: transparent;
+    border-radius: 15px;
+    margin: 2px;
 }
 .send-button {
-    cursor: pointer; /* 鼠标悬停时显示手型 */
+    cursor: pointer;
     transition: transform 0.2s;
 }
-  </style>
+</style>
