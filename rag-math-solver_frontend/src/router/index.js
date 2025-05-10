@@ -3,7 +3,9 @@ import Home from '@/views/Home.vue'
 import LoginPageWithPw from '@/views/LoginPageWithPw.vue'
 import LoginPageWithCode from '@/views/LoginPageWithCode.vue'
 import RegisterPage from '@/views/RegisterPage.vue'
-import ChatComponent from '@/components/ChatComponent.vue'
+// import ChatComponent from '@/components/ChatComponent.vue'
+// import HistoryChatList from '@/components/HistoryChatList.vue'
+import ChatPage from '@/views/ChatPage.vue'
 
 const routes = [
     {
@@ -28,8 +30,8 @@ const routes = [
     },
     {
         path: '/chat',
-        name: 'ChatComponent',
-        component: ChatComponent
+        name: 'ChatPage',
+        component: ChatPage
     }
 ]
 
