@@ -1,0 +1,10 @@
+POST http://192.168.34.46:5000/api/account/sendCode
+Content-Type: application/json
+
+{
+  "phonenumber":"16789237652"
+}
+
+
+
+

@@ -1,0 +1,11 @@
+PUT http://192.168.34.46:5000/api/account/changeBasicUserInfo
+Content-Type: application/json
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNCwiZXhwIjoxNzQ2NjA5OTU3fQ.1_bKhJ2IR_1p6X-VHV0BXyu_brNeyissJ-KpB2jbmkc
+
+{
+  "newUsername":"ddd"
+}
+
+
+
+
