@@ -1,0 +1,9 @@
+GET http://192.168.34.46:5000/api/account/getBasicUserInfo
+Accept: application/json
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNCwiZXhwIjoxNzQ2NjEyMzEwfQ.4Y4As-YByIRl8BwdjRD72qA6AEjn9C6UZ-n-gkZpUms
+###
+
+
+
+
+
