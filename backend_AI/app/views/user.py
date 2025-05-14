@@ -148,6 +148,7 @@ def loginWithPassword():
 def getBasicUserInfo():
     """获取基本用户信息"""
     token = request.headers.get('Authorization')
+    print("the token is {}".format(token))
     user_id = verify_token(token)
     user = User.query.filter_by(id=user_id).first()
 
@@ -171,10 +172,9 @@ def changeBasicUserInfo():
 
     :return:
     """
-    data = request.get_json()
     user_id = get_user_id()
-    newAvatarFile = data.get("newAvatarFile")
-    newUsername = data.get("newUsername")
+    newAvatarFile = request.form.get("newAvatarFile")
+    newUsername = request.form.get("newUsername")
 
     user = User.query.get(user_id)
     if newAvatarFile:

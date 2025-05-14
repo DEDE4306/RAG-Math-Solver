@@ -22,23 +22,22 @@ def generate_token(user_id):
     # 生成 Token，返回解码后的字符串
     token = jwt.encode(payload, current_app.config['SECRET_KEY'], algorithm='HS256')
 
-    # 如果是字节类型，进行解码
-    if isinstance(token, bytes):
-        token = token.decode('utf-8')
-
     return token
 
 
 def verify_token(token):
     """验证JWT Token"""
     try:
+        # print(f"the token sent:{token}")
         payload = jwt.decode(
             token,
             current_app.config['SECRET_KEY'],
             algorithms=['HS256']
         )
+        # print(f"verify token:{payload['user_id']}")
         return payload['user_id']
     except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
+        # print(f"verify token:{token}")
         return None
 
 
@@ -52,7 +51,9 @@ def get_user_id():
 def token_required(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
+        # print(request.headers)
         token = request.headers.get('Authorization')
+        # print("token:", token)
         user_id = get_user_id()
         _token = LoginToken.get_token(user_id)
         if _token != token:
@@ -77,14 +78,14 @@ class PhoneCode:
     def send_code(cls, phone_number):
         code = ''.join(random.choices(string.digits, k=6))
         print(f"发送验证码 {code} 到 {phone_number}")
-        cls.set_code(phone_number, int(code))
-        return code
-        # if send_sms(phone_number, code):
-        #     cls.set_code(phone_number, int(code))
-        #     print(f"发送验证码 {code} 到 {phone_number}")
-        #     return code
-        # else:
-        #     print(f"发送到 {phone_number} 验证码失败")
+        # cls.set_code(phone_number, int(code))
+        # return code
+        if send_sms(phone_number, code):
+            cls.set_code(phone_number, int(code))
+            print(f"发送验证码 {code} 到 {phone_number}")
+            return code
+        else:
+            print(f"发送到 {phone_number} 验证码失败")
 
     @classmethod
     def set_code(cls, phone_number, code):
@@ -120,10 +121,12 @@ class LoginToken:
 
     @classmethod
     def set_token(cls, user_id, token):
+        print(user_id, token)
         cls.token_dict[user_id] = token
 
     @classmethod
     def get_token(cls, user_id):
+        print(f"user_id:{user_id},token:{cls.token_dict.get(user_id)}")
         return cls.token_dict.get(user_id)
 
     @classmethod
