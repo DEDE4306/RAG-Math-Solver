@@ -55,6 +55,7 @@ html, body {
 }
 .register-component {
     width: 42.5%;
+    min-width: 320px;
     height: 55%;
     transform: translateX(-10px); /* 向左偏移 10px */
 }

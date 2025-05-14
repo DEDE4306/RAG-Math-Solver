@@ -113,7 +113,7 @@ export default {
                 return;
             }       
             // 发送验证码请求
-            axios.post('http://127.0.0.1:4523/m1/6179108-5871515-default/api/account/sendCode', {
+            axios.post('http://110.42.205.158:5000/api/account/sendCode', {
                 phonenumber: this.phoneNumber
             }, {
                 headers: {
@@ -227,7 +227,7 @@ export default {
             //}
 
             // 发送 POST 请求到接口
-            axios.post('http://127.0.0.1:4523/m1/6179108-5871515-default/api/account/register', formData, { // 暂时是本地mock链接
+            axios.post('http://127.0.0.1:5000/api/account/register', formData, { // 暂时是本地mock链接
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
