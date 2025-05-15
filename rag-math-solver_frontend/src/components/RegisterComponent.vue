@@ -212,7 +212,7 @@ export default {
             // console.log('OK')
             // 准备要发送的数据
             const formData = new FormData();
-            formData.append('phoneNumber', this.phoneNumber);
+            formData.append('phonenumber', this.phoneNumber);
             formData.append('code', this.code);
             formData.append('username', this.username);
             formData.append('password', this.password);
@@ -223,11 +223,11 @@ export default {
             }
             // 查看 FormData 的内容
             //for (let [key, value] of formData.entries()) {
-                //console.log(key, value);
+            //    console.log(key, value);
             //}
 
             // 发送 POST 请求到接口
-            axios.post('http://127.0.0.1:5000/api/account/register', formData, { // 暂时是本地mock链接
+            axios.post('http://110.42.205.158:5000/api/account/register', formData, { // 暂时是本地mock链接
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
@@ -241,23 +241,26 @@ export default {
             })
             .catch(error => {
                 console.error('注册失败:', error);
-                // 获取 HTTP 状态码
+
+                // 安全获取状态码和响应数据
                 const status = error.response?.status;
-            
-                // 根据不同的状态码显示不同的错误提示
+                const responseData = error.response?.data;
+
                 switch (status) {
                     case 400:
-                        console.log('token:', error.response.data.response.token);
-                        alert('用户已存在');
+                    {
+                        // 使用可选链防止 undefined 报错
+                        const errorMessage = responseData?.message || '用户已存在';
+                        alert(errorMessage);
+                    }
                         break;
                     case 500:
                         alert('服务器内部错误，请稍后再试。');
                         break;
                     default:
-                        // 如果没有特定的状态码，显示通用的错误信息
-                        alert('注册失败: ' + (error.response?.data?.message || error.message));
-                }
-            });
+                        alert('注册失败: ' + (responseData?.message || error.message || '未知错误'));
+    }
+});
         }
     },
     beforeUnmount() {
