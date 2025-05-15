@@ -55,7 +55,7 @@ export default {
                 return;
             }
             // 登录逻辑
-            axios.post('http://127.0.0.1:4523/m1/6179108-5871515-default/api/account/loginWithPassword?apifoxResponseId=653736844', {
+            axios.post('http://110.42.205.158:5000/api/account/loginWithPassword?apifoxResponseId=653736844', {
                 phonenumber: this.phoneNumber,
                 password: this.password
             }, {

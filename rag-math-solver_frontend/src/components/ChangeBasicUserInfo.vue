@@ -58,7 +58,7 @@ export default {
         getBasicUserInfo() {
             const token = localStorage.getItem("token");
             console.log(token);
-            axios.get('http://127.0.0.1:4523/m1/6179108-5871515-default/api/getBasicUserInfo', {
+            axios.get('http://110.42.205.158:5000/api/account/getBasicUserInfo', {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 }
@@ -120,7 +120,7 @@ export default {
 
                 // 发送请求
                 axios.put(
-                    'http://127.0.0.1:4523/m1/6179108-5871515-default/api/account/changeBasicUserInfo',
+                    'http://110.42.205.158:5000/api/account/changeBasicUserInfo',
                     formData,
                     {
                         headers: {

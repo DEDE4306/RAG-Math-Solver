@@ -78,7 +78,7 @@ export default {
                 return;
             }       
             // 发送验证码请求
-            axios.post('http://127.0.0.1:4523/m1/6179108-5871515-default/api/account/sendCode', {
+            axios.post('http://110.42.205.158:5000/api/account/sendCode', {
                 phonenumber: this.phoneNumber
             }, {
                 headers: {
@@ -109,7 +109,7 @@ export default {
                 return;
             }
             // 登录逻辑
-            axios.post('http://127.0.0.1:4523/m1/6179108-5871515-default/api/account/loginWithCode', {
+            axios.post('http://110.42.205.158:5000/api/account/loginWithCode', {
                 phonenumber: this.phoneNumber,
                 code: this.code
             }, {
