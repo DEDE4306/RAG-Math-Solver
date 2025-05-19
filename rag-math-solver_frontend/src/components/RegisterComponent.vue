@@ -259,8 +259,8 @@ export default {
                         break;
                     default:
                         alert('注册失败: ' + (responseData?.message || error.message || '未知错误'));
-    }
-});
+                }
+            });
         }
     },
     beforeUnmount() {

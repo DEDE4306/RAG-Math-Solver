@@ -3,7 +3,7 @@
     <div>
       <h1>欢迎来到首页</h1>
       <router-link to="/login1">前往登录页</router-link>
-      <a href="javascript:;" @click="showChangeBasicUserInfoModal = true">修改个人信息</a>
+      <a href="javascript:;" @click="openChangeBasicUserInfoModal">修改个人信息</a>
       <a @click="showLogoutModal = true">退出登录</a>
     </div>
     <!-- 弹窗组件 -->
@@ -79,6 +79,16 @@ export default {
     methods: {
       // 调试阶段
       clearToken(){localStorage.removeItem('token');},
+      openChangeBasicUserInfoModal() {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          alert('请先登录');
+          return;
+        }
+        this.showChangeBasicUserInfoModal = true;
+        this.showChangePasswordModal = false;
+        this.showChangePhoneNumberModal = false;
+      },
       openChangePhoneNumberModal() {
         this.showChangeBasicUserInfoModal = false;
         this.showChangePasswordModal = false;

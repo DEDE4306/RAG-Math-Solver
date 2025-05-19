@@ -70,6 +70,7 @@ export default {
                     console.log('username:', response.data.response.username);
                     // 将 Token 存储在 localStorage
                     localStorage.setItem("token", response.data.response.token);
+                    this.$router.push('/')
                 } else {
                     alert('登录失败: ' + response.data.msg);
                 }
