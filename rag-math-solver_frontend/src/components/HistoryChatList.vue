@@ -25,15 +25,21 @@
                 {{ session.title }}
             </div>
         </div>
+        
+        <UserProfile />
     </div>
 </template>
 
 <script>
 import axios from 'axios';
 import _ from 'lodash'; // 引入 lodash 用于防抖
+import UserProfile from './UserProfile.vue';
 
 export default {
     name: 'HistorySidebar',
+    components: {
+        UserProfile,
+    },
     data() {
         return {
             sessions: [],
@@ -129,7 +135,7 @@ html, body, #app, .chat-app {
     width: 300px;
     height: 100vh;
     background-color: #f7f7f8;
-    border-right: 1px solid #e5e5e6;
+    border-right: 3px solid #e5e5e6;
     display: flex;
     flex-direction: column;
     padding: 10px;

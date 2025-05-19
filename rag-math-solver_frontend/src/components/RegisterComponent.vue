@@ -237,7 +237,7 @@ export default {
                 console.log('token:', response.data.response.token);
                 alert('注册成功！');
                 // 这里可以添加注册成功后的跳转逻辑
-                this.$router.push('/')
+                this.$router.push('/login1')
             })
             .catch(error => {
                 console.error('注册失败:', error);

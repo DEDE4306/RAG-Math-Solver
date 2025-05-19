@@ -35,8 +35,8 @@ export default {
     },
     methods: {
         goBack() {
-            this.$router.push('/')
-            // this.$router.go(-1)
+            // this.$router.push('/')
+            this.$router.go(-1)
         },
         isNumeric(str) { // 测试是否全是数字
           return /^\d+$/.test(str);
@@ -70,7 +70,7 @@ export default {
                     console.log('username:', response.data.response.username);
                     // 将 Token 存储在 localStorage
                     localStorage.setItem("token", response.data.response.token);
-                    this.$router.push('/')
+                    this.$router.push('/chat')
                 } else {
                     alert('登录失败: ' + response.data.msg);
                 }
