@@ -16,6 +16,7 @@ export default {
         handleLogout() {
             localStorage.removeItem('token');
             alert('退出登录成功');
+            this.$router.go(0);
             this.$emit('close');
         },
         handleCancel() {

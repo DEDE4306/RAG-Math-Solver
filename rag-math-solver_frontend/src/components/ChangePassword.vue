@@ -144,7 +144,7 @@ export default {
             }
             try {
                 const token = localStorage.getItem("token");
-                axios.put('http://110.42.205.158:5000/api/account/changePhoneNumber', {
+                axios.put('http://110.42.205.158:5000/api/account/changePassword', {
                     phonenumber: this.phoneNumber,
                     code: this.code,
                     newPassword: this.password,
