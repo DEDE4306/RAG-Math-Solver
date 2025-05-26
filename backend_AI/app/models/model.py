@@ -14,7 +14,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 class User(db.Model):
     """用户模型"""
-    __tablename__ = 'user'
+    __tablename__ = 'User'
     __table_args__ = {
         'mysql_engine': 'InnoDB',
         'mysql_charset': 'utf8mb4'
@@ -68,15 +68,15 @@ class User(db.Model):
 
 
 class RoleEnum(Enum):
-    USER = 'user'
-    ASSISTANT = 'assistant'
+    user = 'user'
+    assistant = 'assistant'
 
 
 class Session(db.Model):
-    __tablename__ = 'session'
+    __tablename__ = 'Session'
 
     sessionid = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    userid = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
+    userid = db.Column(db.Integer, db.ForeignKey('User.id', ondelete='CASCADE'), nullable=False)
     title = db.Column(db.String(30), nullable=False)
     createdat = db.Column(db.DateTime, server_default=db.func.now())
     updatedat = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
@@ -92,10 +92,10 @@ class Session(db.Model):
 
 
 class Message(db.Model):
-    __tablename__ = 'message'
+    __tablename__ = 'Message'
 
     messageid = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    sessionid = db.Column(db.Integer, db.ForeignKey('session.sessionid', ondelete='CASCADE'), nullable=False)
+    sessionid = db.Column(db.Integer, db.ForeignKey('Session.sessionid', ondelete='CASCADE'), nullable=False)
     role = db.Column(db.Enum(RoleEnum), nullable=False)
     content = db.Column(db.Text, nullable=False)
     createdat = db.Column(db.DateTime, server_default=db.func.now())

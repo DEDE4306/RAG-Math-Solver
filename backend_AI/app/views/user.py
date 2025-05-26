@@ -2,15 +2,19 @@
 # -*- coding: utf-8 -*-
 import os
 import re
+import uuid
 
 from flask import Blueprint, request, current_app, send_from_directory, url_for
+from flask_cors import cross_origin
+
+from pathlib import Path
 
 from config import PORT
 from app.models.db import db
 from app.models.model import User  # 导入用户模型
 from app.utils.auth import generate_token, token_required, verify_token, get_user_id, PhoneCode, LoginToken
 from app.utils.response import flask_response
-from pathlib import Path
+
 
 account = Blueprint('user', __name__, url_prefix='/api/account')
 
@@ -60,8 +64,8 @@ def register():
         if file and file.filename.split(".")[-1] in ['jpg', 'png', 'jpeg', 'gif']:
             # 生成唯一文件名
             ext = file.filename.rsplit('.', 1)[1].lower()
-            # filename = f"{uuid.uuid4()}.{ext}"
-            filename = file.filename
+            filename = f"{uuid.uuid4()}.{ext}"
+            # filename = file.filename
             app_path = Path(__file__).parent.parent
             file.save(os.path.join(app_path,"static","avatars", filename))
             avatar_url = f"/static/avatars/{filename}"
@@ -74,19 +78,19 @@ def register():
     )
     new_user.set_password(password)
 
-    # try:
-    db.session.add(new_user)
-    db.session.commit()
+    try:
+        db.session.add(new_user)
+        db.session.commit()
 
         # 生成token
-    token = generate_token(new_user.id)
-    PhoneCode.del_code(phone)
-    return flask_response(code=200, message=f'注册成功', data={"token": token})
+        token = generate_token(new_user.id)
+        PhoneCode.del_code(phone)
+        return flask_response(code=200, message=f'注册成功', data={"token": token})
 
-    # except Exception as e:
-    # db.session.rollback()
-    # print(str(e))
-    # return flask_response(code=500, message='注册失败: ' + str(e))
+    except Exception as e:
+        db.session.rollback()
+        print(str(e))
+        return flask_response(code=500, message='注册失败: ' + str(e))
 
 
 @account.route('/sendCode', methods=['POST'])
@@ -147,9 +151,11 @@ def loginWithPassword():
 @token_required
 def getBasicUserInfo():
     """获取基本用户信息"""
-    token = request.headers.get('Authorization')
-    print("the token is {}".format(token))
-    user_id = verify_token(token)
+    # token = request.headers.get('Authorization')
+    # print("the token is {}".format(token))
+    # user_id = verify_token(token)
+    user_id = get_user_id()
+    # print(f"[DEBUG] Parsed user_id from token: {user_id}")
     user = User.query.filter_by(id=user_id).first()
 
     image_filename = os.path.basename(user.avatarUrl)
@@ -157,7 +163,7 @@ def getBasicUserInfo():
     image_url = url_for('user.get_uploaded_file', filename=f'{image_filename}')
 
     data = {
-        'avatarUrl': f"http://localhost:{PORT}" + image_url,
+        'avatarUrl': f"http://100.42.205.158:{PORT}" + image_url,
         'username': user.username,
         'phonenumber': user.phonenumber,
     }
@@ -173,14 +179,30 @@ def changeBasicUserInfo():
     :return:
     """
     user_id = get_user_id()
-    newAvatarFile = request.form.get("newAvatarFile")
-    newUsername = request.form.get("newUsername")
-
     user = User.query.get(user_id)
-    if newAvatarFile:
-        user.avatarUrl = newAvatarFile
-    if newUsername:
-        user.username = newUsername
+    # 处理头像更新
+    if 'newAvatarFile' in request.files:
+        # 删除旧头像文件（如果存在）
+        if user.avatarUrl:
+            old_avatar_path = Path(__file__).parent.parent / user.avatarUrl.lstrip('/')
+            if old_avatar_path.exists():
+                os.remove(old_avatar_path)
+        # 处理头像上传
+        file = request.files['newAvatarFile']
+        # 保存文件到服务器
+        if file and file.filename.split(".")[-1] in ['jpg', 'png', 'jpeg', 'gif']:
+            # 生成唯一文件名
+            ext = file.filename.rsplit('.', 1)[1].lower()
+            filename = f"{uuid.uuid4()}.{ext}"
+        else:
+            return  flask_response(code=400, message=f'请上传正确的文件格式')
+
+        app_path = Path(__file__).parent.parent
+        file.save(os.path.join(app_path, "static", "avatars", filename))
+        user.avatarUrl = f"/static/avatars/{filename}"
+    # 处理用户名更新
+    if 'newUsername' in request.form:
+        user.username = request.form['newUsername']
     db.session.commit()
     return flask_response(code=200, message='更新基本信息成功')
 
@@ -231,9 +253,13 @@ def changePassword():
     db.session.commit()
     return flask_response(code=200, message='更新密码成功')
 
-
+# @token_required
 @account.route('/img/<filename>')
-@token_required
+@cross_origin()  # 允许跨域请求
 def get_uploaded_file(filename):
     upload_dir = os.path.join(current_app.config['UPLOAD_FOLDER'])
+    # print(f"[DEBUG] Looking for file: {filename} in directory: {upload_dir}")
+    if not os.path.exists(os.path.join(upload_dir, filename)):
+        # print("[ERROR] File does not exist.")
+        return "File not found", 404
     return send_from_directory(upload_dir, filename)

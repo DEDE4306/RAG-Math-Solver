@@ -14,6 +14,7 @@ PORT = int(os.getenv("PORT", 5000))
 MYSQL_HOST = os.getenv("MYSQL_HOST", "localhost")
 MYSQL_USER = os.getenv("MYSQL_USER", "root")
 MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD", "password")
+MYSQL_NAME = os.getenv("MYSQL_NAME")
 # 阿里云短信服务
 access_key_id = os.getenv("ACCESS_KEY_ID")
 access_key_secret = os.getenv("ACCESS_KEY_SECRET")
@@ -27,6 +28,8 @@ redis_port = os.getenv("REDIS_PORT", "6379")
 redis_db = os.getenv("REDIS_DB", "0")
 redis_password = os.getenv("REDIS_PASSWORD", "password")
 
+ocr_api_key = os.getenv("API_KEY")
+ocr_secret_key = os.getenv("SECRET_KEY")
 
 
 

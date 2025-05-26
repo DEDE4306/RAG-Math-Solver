@@ -15,7 +15,19 @@ class QwenClient:
             messages=[
                 {'role': 'system', 'content': '你是一个精通数学的 AI，现在需要你为同学或老师解决小学到高中的数学问题'},
                 {'role': 'user', 'content': prompt}]
+            # stream = True,  # 开启流式输出
         )
         answer = completion.choices[0].message.content
         print(answer) # 返回纯文本内容
         return answer
+
+        # answer = ""
+        # for chunk in completion:
+        #     try:
+        #         content = chunk.choices[0].delta.content
+        #         answer += content
+        #         print(content, end="", flush=True)  # 实时打印
+        #     except KeyError:
+        #         continue
+        # print()  # 换行
+        # return answer
