@@ -25,15 +25,21 @@
                 {{ session.title }}
             </div>
         </div>
+        
+        <UserProfile />
     </div>
 </template>
 
 <script>
 import axios from 'axios';
 import _ from 'lodash'; // 引入 lodash 用于防抖
+import UserProfile from './UserProfile.vue';
 
 export default {
     name: 'HistorySidebar',
+    components: {
+        UserProfile,
+    },
     data() {
         return {
             sessions: [],
@@ -65,6 +71,11 @@ export default {
                 const data = response.data;
                 if (data.success) {
                     this.sessions = data.response;
+                    // 选择最新的会话（可选：根据需求调整）
+                    if (this.sessions.length > 0 && !this.activeSessionId) {
+                        const latestSession = this.sessions[0];
+                        this.selectSession(latestSession.sessionid, latestSession.title);
+                    }
                 } else {
                     alert(`获取历史记录失败: ${data.msg || '未知错误'}`);
                 }
@@ -101,15 +112,39 @@ export default {
             this.$emit('new-chat');
         },
     
-        addSession(session) {
-            console.log('addSession 调用:', session);
-            if (!this.sessions.some(s => s.sessionid === session.sessionid)) {
-                this.sessions.unshift(session);
-                this.activeSessionId = session.sessionid;
+        addSession(session, replaceSessionId = null) {
+            console.log('addSession 调用:', { session, replaceSessionId });
+            if (replaceSessionId) {
+                // 替换旧会话
+                const index = this.sessions.findIndex(s => s.sessionid === replaceSessionId);
+                if (index !== -1) {
+                    this.sessions.splice(index, 1, {
+                        sessionid: session.sessionid,
+                        title: session.title
+                    });
+                } else {
+                    // 如果未找到旧会话，添加新会话
+                    if (!this.sessions.some(s => s.sessionid === session.sessionid)) {
+                        this.sessions.unshift(session);
+                    }
+                }
+            } else {
+                // 更新或添加会话
+                const index = this.sessions.findIndex(s => s.sessionid === session.sessionid);
+                if (index !== -1) {
+                    // 更新现有会话的标题
+                    this.sessions.splice(index, 1, {
+                        sessionid: session.sessionid,
+                        title: session.title
+                    });
+                } else {
+                    // 添加新会话
+                    this.sessions.unshift(session);
+                }
             }
+            this.activeSessionId = session.sessionid;
         },
     
-        // 防抖版本的 selectSession
         debouncedSelectSession: _.debounce(function (sessionId, title) {
             this.selectSession(sessionId, title);
         }, 300)
@@ -129,7 +164,7 @@ html, body, #app, .chat-app {
     width: 300px;
     height: 100vh;
     background-color: #f7f7f8;
-    border-right: 1px solid #e5e5e6;
+    border-right: 3px solid #e5e5e6;
     display: flex;
     flex-direction: column;
     padding: 10px;

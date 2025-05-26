@@ -29,9 +29,31 @@ import json
 #
 # find_long_contents(json_path, length_threshold)
 
+# import json
+#
+# with open("../data/formula.json", "r", encoding="utf-8") as f:
+#     data = json.load(f)
+#
+# print(f"共有 {len(data)} 条数据")
+
+import requests
 import json
 
-with open("../data/formula.json", "r", encoding="utf-8") as f:
-    data = json.load(f)
 
-print(f"共有 {len(data)} 条数据")
+def main():
+    url = "https://aip.baidubce.com/oauth/2.0/token?client_id=7BSzqiyFETLI9whHbg7Shs4D&client_secret=qf6tB73jcT1jiWp8hJdaaHPxLYEgbVc6&grant_type=client_credentials"
+
+    payload = json.dumps("", ensure_ascii=False)
+    headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+    }
+
+    response = requests.request("POST", url, headers=headers, data=payload.encode("utf-8"))
+
+    print(response.text)
+
+
+if __name__ == '__main__':
+    main()
+

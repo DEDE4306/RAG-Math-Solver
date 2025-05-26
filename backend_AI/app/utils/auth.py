@@ -44,32 +44,90 @@ def verify_token(token):
 def get_user_id():
     """获取用户ID"""
     token = request.headers.get('Authorization')
+    if token and token.startswith('Bearer '):
+        token = token.split(' ')[1]
     user_id = verify_token(token)
     return user_id
 
 
+# def token_required(func):
+#     @wraps(func)
+#     def wrapper(*args, **kwargs):
+#         # print(request.headers)
+#         token = request.headers.get('Authorization')
+#         # print("token:", token)
+#         user_id = get_user_id()
+#         _token = LoginToken.get_token(user_id)
+#         if _token != token:
+#             return flask_response(code=401, message=f'token已过期')
+#         if not token:
+#             return flask_response(code=401, message=f'无token')
+#         user_id = verify_token(token)
+#         if not user_id:
+#             return flask_response(code=401, message=f'失效的token')
+#         if kwargs:
+#             return func(**kwargs)
+#
+#         return func()
+#
+#     return wrapper
 def token_required(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
+        # print("========== 进入 token_required ==========")
+
+        # 打印整个请求头，用于调试
+        # print("请求头 (request.headers):")
         # print(request.headers)
-        token = request.headers.get('Authorization')
-        # print("token:", token)
-        user_id = get_user_id()
-        _token = LoginToken.get_token(user_id)
-        if _token != token:
-            return flask_response(code=401, message=f'token已过期')
+
+        # 放行 OPTIONS 请求
+        if request.method == 'OPTIONS':
+            # print("[INFO] 检测到 OPTIONS 请求，直接放行")
+            return func(*args, **kwargs)
+
+        # 获取 Token 并移除 'Bearer ' 前缀
+        auth_header = request.headers.get('Authorization')
+        # print(f"[DEBUG] Authorization Header: {auth_header}")
+
+        if not auth_header:
+            # print("[ERROR] 无 Authorization 请求头")
+            return flask_response(code=401, message='无token')
+
+        if not auth_header.startswith('Bearer '):
+            # print("[ERROR] Authorization 格式错误，必须以 'Bearer ' 开头")
+            return flask_response(code=401, message='无效的token格式')
+
+        token = auth_header.split(' ')[1]
+        # print(f"[DEBUG] 提取的 Token: {token}")
+
         if not token:
-            return flask_response(code=401, message=f'无token')
+            # print("[ERROR] 提取到的 Token 为空")
+            return flask_response(code=401, message='无token')
+
+        # 解析 Token 获取 user_id
         user_id = verify_token(token)
+        # print(f"[DEBUG] 解析得到的 user_id: {user_id}")
+
         if not user_id:
-            return flask_response(code=401, message=f'失效的token')
+            # print("[ERROR] Token 验证失败，可能是过期或无效 Token")
+            return flask_response(code=401, message='失效的token')
+
+        # 检查 Token 是否和数据库中的一致
+        db_token = LoginToken.get_token(user_id)
+        # print(f"[DEBUG] 数据库中存储的 Token: {db_token}")
+
+        if db_token != token:
+            # print("[ERROR] Token 不一致，可能已过期或被其他设备登录覆盖")
+            return flask_response(code=401, message='token已过期')
+
+        # print("[SUCCESS] Token 验证通过，开始执行接口逻辑")
+
+        # 执行真正的函数
         if kwargs:
             return func(**kwargs)
-
         return func()
 
     return wrapper
-
 
 class PhoneCode:
     code_dict = {}

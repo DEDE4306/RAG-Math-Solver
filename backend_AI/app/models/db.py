@@ -14,7 +14,7 @@ def init_db(app=None):
     """初始化数据库"""
     if not app:
         app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}/rag'
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}/{MYSQL_NAME}'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     password = "123"

@@ -55,7 +55,17 @@ export default {
         this.getBasicUserInfo();
     },
     methods: {
+        checkToken() {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                alert('请先登录');
+                return false;
+            }
+            return true;
+        },
         getBasicUserInfo() {
+            // if (!this.checkToken()) return;
+            
             const token = localStorage.getItem("token");
             console.log(token);
             axios.get('http://110.42.205.158:5000/api/account/getBasicUserInfo', {
@@ -112,10 +122,10 @@ export default {
             
                 // 只添加有变化的字段
                 if (this.avatarFile) {
-                    formData.append('avatar', this.avatarFile);
+                    formData.append('newAvatarFile', this.avatarFile);
                 }            
                 if (this.username && this.username.trim() !== '') {
-                    formData.append('username', this.username.trim());
+                    formData.append('newUsername', this.username.trim());
                 }
 
                 // 发送请求

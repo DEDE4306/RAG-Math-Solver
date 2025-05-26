@@ -5,6 +5,7 @@ import LoginPageWithCode from '@/views/LoginPageWithCode.vue'
 import RegisterPage from '@/views/RegisterPage.vue'
 // import ChatComponent from '@/components/ChatComponent.vue'
 // import HistoryChatList from '@/components/HistoryChatList.vue'
+import UserProfile from '@/components/UserProfile.vue'
 import ChatPage from '@/views/ChatPage.vue'
 
 const routes = [
@@ -32,6 +33,11 @@ const routes = [
         path: '/chat',
         name: 'ChatPage',
         component: ChatPage
+    }, 
+    {
+        path: '/user',
+        name: 'UserProfile',
+        component: UserProfile
     }
 ]
 
