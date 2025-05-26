@@ -15,6 +15,8 @@ from ..models.model import Session, Message, RoleEnum
 from pathlib import Path
 from config import api_key
 
+MAX_HISTORY = 10
+
 
 chat = Blueprint('chat', __name__, url_prefix='/api/chat') # 创建一个聊天蓝图
 
@@ -90,6 +92,9 @@ def send_message():
 
         message = Message.query.filter_by(sessionid=sessionid).all()
         messages = [{"role": msg.role.value, "content": msg.content} for msg in message]
+        messages.append({"role": "user", "content": content})
+        messages = messages[-MAX_HISTORY:]
+
         result = chat_completion(messages)
 
 
