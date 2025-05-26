@@ -87,7 +87,14 @@ def send_message():
         content = data.get('content')
         sessionid = data.get('sessionid')
 
-        result = chat_completion(content)
+
+        message = Message.query.filter_by(sessionid=sessionid).all()
+        messages = [{"role": msg.role.value, "content": msg.content} for msg in message]
+        result = chat_completion(messages)
+
+
+        if result is None:
+            return flask_response(code=500, message=f'ai服务器异常')
 
         save_message_db(sessionid, content, "user")
         msg2 = save_message_db(sessionid, result, "assistant")
