@@ -1,1 +1,4 @@
 backend_AI/.env
+__pycache__/
+*.pyc
+
