@@ -1,68 +1,72 @@
 <template>
     <div class="chat-app">
-        <h1>{{ sessionTitle }}</h1>
-        <div class="chat-container">
-            <div class="message-list" ref="messageList">
-                <div 
-                    v-for="message in messages" 
-                    :key="message.messageid"
-                    :class="['message-bubble', message.role, { 'pending': message.status === 'pending' }]"
-                    @mouseenter="showEditButton(message.messageid)"
-                    @mouseleave="hideEditButton(message.messageid)"
-                >
-                    <!-- 正常消息显示 -->
-                    <div v-if="editingMessageId !== message.messageid || message.role !== 'user'" class="message-content">
-                        {{ message.content }}
-                        <button 
-                            v-if="message.role === 'user' && hoveredMessageId === message.messageid && !message.status"
-                            class="edit-button"
-                            title="编辑"
-                            @mouseenter="showEditButton(message.messageid)"
-                            @mouseleave="hideEditButton(message.messageid)"
-                            @click="startEditing(message)"
-                        >
-                            <PencilIcon class="edit-icon" />
-                        </button>
-                    </div>
-                    <!-- 编辑模式下的输入框 -->
-                    <div v-else class="edit-input-area">
-                        <textarea
-                            v-model="editingMessageContent"
-                            @keydown.enter.exact.prevent="submitEditedMessage(message.messageid)"
-                            rows="1"
-                            ref="editTextarea"
-                            class="edit-textarea"
-                        ></textarea>
-                        <button @click="submitEditedMessage(message.messageid)">提交</button>
-                        <button @click="cancelEditing">取消</button>
-                    </div>
-                    <span v-if="message.status === 'pending' && message.role === 'user'" class="status">发送中...</span>
-                </div>
+      <h1>{{ sessionTitle }}</h1>
+      <div class="chat-container">
+        <div class="message-list" ref="messageList">
+          <div
+            v-for="message in messages"
+            :key="message.messageid"
+            class="message-bubble"
+            :class="[message.role, { 'pending': message.status === 'pending' }]"
+            @mouseenter="showEditButton(message.messageid)"
+            @mouseleave="hideEditButton(message.messageid)"
+          >
+            <!-- 正常消息显示 -->
+            <div v-if="editingMessageId !== message.messageid || message.role !== 'user'" class="message-content-wrapper">
+              <div class="message-content" v-html="renderMessage(message.content)"></div>
+              <button
+                v-if="message.role === 'user' && hoveredMessageId === message.messageid && !message.status"
+                class="edit-button"
+                title="编辑"
+                @mouseenter="showEditButton(message.messageid)"
+                @mouseleave="hideEditButton(message.messageid)"
+                @click="startEditing(message)"
+              >
+                <PencilIcon class="edit-icon" />
+              </button>
             </div>
-        
-            <div class="input-area">
-                <textarea
-                    v-model="newMessage"
-                    @keydown.enter.exact.prevent="sendMessage"
-                    placeholder="输入消息..."
-                    rows="1"
-                    ref="textarea"
-                ></textarea>
-                <img
-                    src="@/../public/send.png"
-                    class="send-button"
-                    @click="sendMessage"
-                    alt="发送"
-                >
+            <!-- 编辑模式下的输入框 -->
+            <div v-else class="edit-input-area">
+              <textarea
+                v-model="editingMessageContent"
+                @keydown.enter.exact.prevent="submitEditedMessage(message.messageid)"
+                rows="1"
+                ref="editTextarea"
+                class="edit-textarea"
+              ></textarea>
+              <button @click="submitEditedMessage(message.messageid)">提交</button>
+              <button @click="cancelEditing">取消</button>
             </div>
+            <span v-if="message.status === 'pending' && message.role === 'user'" class="status">发送中...</span>
+          </div>
         </div>
+  
+        <div class="input-area">
+          <textarea
+            v-model="newMessage"
+            @keydown.enter.exact.prevent="sendMessage"
+            placeholder="输入消息..."
+            rows="1"
+            ref="textarea"
+          ></textarea>
+          <img
+            src="@/../public/send.png"
+            class="send-button"
+            @click="sendMessage"
+            alt="发送"
+          >
+        </div>
+      </div>
     </div>
-</template>
+  </template>
 
 <script>
 import { nextTick } from 'vue';
 import axios from 'axios';
 import { PencilIcon } from '@heroicons/vue/24/solid';
+import MarkdownIt from 'markdown-it';
+import katex from 'katex';
+import 'katex/dist/katex.min.css'; // 引入 KaTeX 样式
 
 export default {
     components: {
@@ -80,13 +84,27 @@ export default {
     },
     data() {
         return {
-            messages: [],
-            newMessage: '',
-            isNewSession: false,
-            hoveredMessageId: null,
-            editingMessageId: null,
-            editingMessageContent: ''
-        };
+    messages: [
+      {
+        messageid: 'test-1',
+        role: 'assistant',
+        content: `我们来求解方程 $x^2 + x + 1 = 4$。\n\n### 第一步：整理方程\n将方程整理为标准形式：\n$$\nx^2 + x + 1 - 4 = 0\n$$\n$$\nx^2 + x - 3 = 0\n$$\n\n这是一个 **一元二次方程**，其一般形式为 $ax^2 + bx + c = 0$，其中 $a = 1$, $b = 1$, $c = -3$。\n\n---\n\n### 第二步：使用求根公式\n一元二次方程的求根公式为：\n$$\nx = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}\n$$\n\n将 $a = 1$, $b = 1$, $c = -3$ 代入公式：\n$$\nx = \\frac{-1 \\pm \\sqrt{1^2 - 4 \\cdot 1 \\cdot (-3)}}{2 \\cdot 1}\n$$\n$$\nx = \\frac{-1 \\pm \\sqrt{1 + 12}}{2}\n$$\n$$\nx = \\frac{-1 \\pm \\sqrt{13}}{2}\n$$\n\n---\n\n### 第三步：写出两个解\n因此，方程的两个解为：\n$$\nx_1 = \\frac{-1 + \\sqrt{13}}{2}, \\quad x_2 = \\frac{-1 - \\sqrt{13}}{2}\n$$\n\n---\n\n### 最终答案\n方程 $x^2 + x + 1 = 4$ 的解为：\n$$\n\\boxed{x_1 = \\frac{-1 + \\sqrt{13}}{2}, \\quad x_2 = \\frac{-1 - \\sqrt{13}}{2}}\n$$`,
+        createdat: this.getCurrentDateTime()
+      },
+      {
+        messageid: 'test-2',
+        role: 'user',
+        content: '请帮我解这个方程：**x^2 + x + 2 = 10**',
+        createdat: this.getCurrentDateTime()
+      }
+    ],
+    newMessage: '',
+    isNewSession: false,
+    hoveredMessageId: null,
+    editingMessageId: null,
+    editingMessageContent: '',
+    md: new MarkdownIt() // 初始化 markdown-it
+  };
     },
     watch: {
         sessionId(newVal, oldVal) {
@@ -110,6 +128,47 @@ export default {
             const minutes = String(now.getMinutes()).padStart(2, '0');
             const seconds = String(now.getSeconds()).padStart(2, '0');
             return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        },
+
+        // 渲染消息内容，处理 Markdown 和 LaTeX
+        renderMessage(content) {
+            // 使用 markdown-it 解析 Markdown
+            let htmlContent = this.md.render(content);
+
+            // 替换 LaTeX 公式
+            // 处理 $$...$$（显示公式）
+            htmlContent = htmlContent.replace(/\$\$([\s\S]*?)\$\$/g, (match, tex) => {
+                try {
+                    return katex.renderToString(tex.trim(), { displayMode: true, throwOnError: false });
+                } catch (e) {
+                    console.error('KaTeX 渲染错误:', e);
+                    return match; // 渲染失败时返回原始内容
+                }
+            });
+
+            // 处理 \(...\)（行内公式）
+            htmlContent = htmlContent.replace(/\\\(([\s\S]*?)\\\)/g, (match, tex) => {
+                try {
+                    return katex.renderToString(tex.trim(), { displayMode: false, throwOnError: false });
+                } catch (e) {
+                    console.error('KaTeX 渲染错误:', e);
+                    return match;
+                }
+            });
+
+            // 处理 $...$（行内公式）
+            htmlContent = htmlContent.replace(/\$([\s\S]*?)\$/g, (match, tex) => {
+                // 避免匹配 $$...$$（防止重复处理）
+                if (match.startsWith('$$')) return match;
+                try {
+                    return katex.renderToString(tex.trim(), { displayMode: false, throwOnError: false });
+                } catch (e) {
+                    console.error('KaTeX 渲染错误:', e);
+                    return match;
+                }
+            });
+
+            return htmlContent;
         },
       
         loadMessages(sessionId) {
@@ -384,6 +443,8 @@ h1 {
     word-wrap: break-word;
     text-align: left;
     font-size: 18px;
+    display: flex;
+    flex-direction: column;
 }
 .message-bubble.assistant {
     margin-left: 5%;
@@ -403,8 +464,18 @@ h1 {
 .message-bubble.pending {
     opacity: 0.7;
 }
-.message-content {
+.message-content-wrapper {
     position: relative;
+    display: flex;
+    align-items: flex-start;
+}
+.message-content {
+    flex: 1;
+    overflow: visible; /* 确保 KaTeX 公式不被裁剪 */
+}
+/* 调整公式显示样式（可选） */
+.katex { 
+    font-size: 1.1em;
 }
 .message-bubble.user::before {
     content: '';
