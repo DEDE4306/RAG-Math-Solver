@@ -40,15 +40,16 @@ class FaissIndexer:
 
     def load(self):
         # 加载索引文件和文本文件
-        if os.path.exists(self.index_path):
-            self.index = faiss.read_index(self.index_path)
-        else:
-            print("未找到 index 文件")
-        if os.path.exists(self.texts_path):
-            with open(self.texts_path, 'rb') as f:
-                self.texts = pickle.load(f)
-        else:
-            print("未找到文本文件")
+        if self.index is None:
+            if os.path.exists(self.index_path):
+                self.index = faiss.read_index(self.index_path)
+            else:
+                print("未找到 index 文件")
+            if os.path.exists(self.texts_path):
+                with open(self.texts_path, 'rb') as f:
+                    self.texts = pickle.load(f)
+            else:
+                print("未找到文本文件")
 
     def search(self, query_vector, k=5):
         if self.index is None:
@@ -64,4 +65,8 @@ class FaissIndexer:
         """
         embeddings, texts = dataset_embedder.get_embeddings()
         self.add(embeddings, texts)
+
+    def update(self, new_vectors, new_texts):
+        self.add(new_vectors, new_texts)
+        self.save()
 
