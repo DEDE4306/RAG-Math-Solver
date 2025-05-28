@@ -6,7 +6,7 @@ import os
 from datetime import datetime
 from flask import Blueprint,request,jsonify
 from ..llm.qwen_client import QwenClient
-from ..utils.ai import chat_completion
+from ..utils.ai import chat_completion, compress_messages
 from ..utils.auth import token_required, verify_token, get_user_id
 from ..utils.response import flask_response
 from ..utils.ocr import BaiduOCRClient
@@ -15,7 +15,7 @@ from ..models.model import Session, Message, RoleEnum
 from pathlib import Path
 from config import api_key
 
-MAX_HISTORY = 10
+MAX_HISTORY = 4
 
 
 chat = Blueprint('chat', __name__, url_prefix='/api/chat') # 创建一个聊天蓝图
@@ -38,7 +38,8 @@ def create_new_session():
     data = request.get_json()
     content = data.get("content")
     user_id = get_user_id()
-    result = chat_completion(content)
+    message = [{"role": "user", "content": content}]
+    result = chat_completion(message)
     if result is False:
         return flask_response(code=500, message=f'ai服务器异常')
 
@@ -83,7 +84,7 @@ def create_new_session():
 @chat.route('/sendMessage',methods=['POST'])
 @token_required
 def send_message():
-    # try:
+    try:
         # 获取数据
         data = request.get_json()
         content = data.get('content')
@@ -94,9 +95,9 @@ def send_message():
         messages = [{"role": msg.role.value, "content": msg.content} for msg in message]
         messages.append({"role": "user", "content": content})
         messages = messages[-MAX_HISTORY:]
+        messages = compress_messages(messages)
 
         result = chat_completion(messages)
-
 
         if result is None:
             return flask_response(code=500, message=f'ai服务器异常')
@@ -114,12 +115,12 @@ def send_message():
         return flask_response(code=200, message='消息发送成功', data=data)
 
 
-    # except Exception as e:
-    #     return jsonify({
-    #         "success": False,
-    #         "msg": f"服务异常：{str(e)}",
-    #         "response": {}
-    #     })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "msg": f"服务异常：{str(e)}",
+            "response": {}
+        })
 
 @chat.route('/getMessageListBySessionid/<sessionid>', methods=['GET'])
 @token_required
@@ -158,6 +159,7 @@ def edit_hostory_message(messageid):
 
     message = Message.query.filter(Message.sessionid == sessionid, Message.messageid <= int(messageid)).all()
     messages = [{"role": msg.role.value, "content": msg.content} for msg in message]
+    messages = compress_messages(messages)
     result = chat_completion(messages)
     if result is False:
         return flask_response(code=500, message=f'ai服务器异常')

@@ -25,6 +25,7 @@ class QwenClient:
             # stream = True,  # 开启流式输出
         )
         answer = completion.choices[0].message.content
+        print("====模型回复====")
         print(answer) # 返回纯文本内容
         return answer
 
