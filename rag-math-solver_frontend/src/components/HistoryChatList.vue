@@ -3,14 +3,23 @@
         <!-- 顶部系统名称 -->
         <div class="sidebar-header">
             <h1>Math Solver</h1>
+            <div class="header-decoration"></div>
         </div>      
+        
         <!-- 开始新对话按钮 -->
         <div class="new-chat-btn" @click="startNewChat">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 5v14m-7-7h14"/>
+            </svg>
             开启新对话
         </div>      
+        
         <!-- 加载状态 -->
         <div v-if="loading" class="loading-state">
-             加载中...
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+            </div>
+            加载中...
         </div>
     
         <!-- 历史对话列表 -->
@@ -22,7 +31,12 @@
                 :class="{ 'active': activeSessionId === session.sessionid }"
                 @click="debouncedSelectSession(session.sessionid, session.title)"
             >
-                {{ session.title }}
+                <div class="history-item-content">
+                    <svg class="chat-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    <span class="history-title">{{ session.title }}</span>
+                </div>
             </div>
         </div>
         
@@ -61,9 +75,9 @@ export default {
             this.loading = true;
             try {
                 const token = localStorage.getItem('token');
-                const response = await axios.get('http://127.0.0.1:4523/m1/6179108-5871515-default/api/chat/getHistoricalSessions', {
+                const response = await axios.get('http://110.42.205.158:5000/api/chat/getHistoricalSessions', {
                     headers: {
-                        'Authorization': token,
+                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     }
                 });
@@ -84,7 +98,7 @@ export default {
                 if (err.response) {
                     if (err.response.status === 401) {
                         errorMsg = '登录已过期，请重新登录';
-                        this.$router.push('/login');
+                        this.$router.push('/login1');
                     } else {
                         errorMsg = `服务器错误: ${err.response.status}`;
                     }
@@ -153,85 +167,290 @@ export default {
 </script>
 
 <style scoped>
-html, body, #app, .chat-app {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-}
 .history-sidebar {
     width: 300px;
     height: 100vh;
-    background-color: #f7f7f8;
-    border-right: 3px solid #e5e5e6;
+    background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
     display: flex;
     flex-direction: column;
-    padding: 10px;
+    padding: 0;
     box-sizing: border-box;
-    align-items: center;
-}  
+    position: relative;
+    overflow: hidden;
+}
+
+.history-sidebar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+    pointer-events: none;
+}
+
 .sidebar-header {
-    padding: 15px 10px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 20px 20px;
     text-align: center;
-    border-bottom: 1px solid #e5e5e6;
-    margin-bottom: 15px;
-}  
+    position: relative;
+    overflow: hidden;
+}
+
+.sidebar-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
 .sidebar-header h1 {
     margin: 0;
-    font-size: 36px;
-    font-weight: bold;
-    color: #333;
-}  
-.new-chat-btn {
-    background: linear-gradient(to right, #3f51b5, #7498ff);
+    font-size: 32px;
+    font-weight: 700;
     color: white;
-    padding: 10px 15px;
-    height: 40px;
-    width: 210px;
-    border-radius: 25px;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    position: relative;
+    z-index: 1;
+    letter-spacing: -0.5px;
+}
+
+.header-decoration {
+    position: absolute;
+    bottom: 0;
+    left: 20px;
+    right: 20px;
+    height: 3px;
+    background: linear-gradient(90deg, #3f51b5, #7c4dff, #2196f3);
+    border-radius: 2px;
+}
+
+.new-chat-btn {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.8));
+    color: #667eea;
+    padding: 16px 24px;
+    margin: 20px;
+    border-radius: 20px;
     text-align: center;
-    margin-bottom: 20px;
     cursor: pointer;
-    transition: background-color 0.2s;
-    font-size: 24px;
-    font-weight: bold;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 16px;
+    font-weight: 600;
     display: flex;
     align-items: center;
     justify-content: center;
-    line-height: normal;
+    gap: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transform: translateY(0);
 }
+
+.new-chat-btn:hover {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.95));
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    color: #5a67d8;
+}
+
+.new-chat-btn:active {
+    transform: translateY(0);
+}
+
 .history-list {
     flex: 1;
     overflow-y: auto;
+    padding: 0 15px 20px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
 }
+
+.history-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.history-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.history-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+}
+
+.history-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
 .history-item {
-    padding: 10px 15px;
-    margin-bottom: 5px;
-    width: 250px;
-    height: 30px;
-    border-radius: 15px;
+    margin-bottom: 8px;
+    border-radius: 16px;
     cursor: pointer;
-    text-align: left;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    position: relative;
+    transform: translateY(0);
+    animation: itemSlideIn 0.4s ease-out;
+}
+
+@keyframes itemSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.history-item:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.history-item.active {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.15));
+    color: white;
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.history-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(to bottom, #3f51b5, #7c4dff);
+    border-radius: 0 4px 4px 0;
+}
+
+.history-item-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    width: 100%;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.history-item.active .history-item-content {
+    color: white;
+}
+
+.chat-icon {
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+    flex-shrink: 0;
+}
+
+.history-item:hover .chat-icon,
+.history-item.active .chat-icon {
+    opacity: 1;
+}
+
+.history-title {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-size: 16px;
-    display: flex;
-    align-items: center;
-    line-height: normal;
+    font-weight: 500;
+    line-height: 1.4;
 }
-.history-item:hover {
-    background-color: #e8e8e8;
-}
-.history-item.active {
-    background: linear-gradient(to right, #3f51b5, #7498ff);
-    color: white;
-}
+
 .loading-state {
-    padding: 10px;
+    padding: 20px;
     text-align: center;
-    color: #666;
-    font-size: 14px;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.loading-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top: 3px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .history-sidebar {
+        width: 280px;
+    }
+    
+    .sidebar-header {
+        padding: 20px 15px;
+    }
+    
+    .sidebar-header h1 {
+        font-size: 28px;
+    }
+    
+    .new-chat-btn {
+        margin: 15px;
+        padding: 14px 20px;
+        font-size: 15px;
+    }
+    
+    .history-item-content {
+        padding: 12px 16px;
+    }
+    
+    .history-title {
+        font-size: 14px;
+    }
+}
+
+/* 暗色模式适配 */
+@media (prefers-color-scheme: dark) {
+    .new-chat-btn {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
+    }
+    
+    .new-chat-btn:hover {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.95));
+    }
+}
+
+.history-sidebar :deep(.user-profile) {
+    height: 98px; /* 与 ChatComponent 输入区域高度一致 */
 }
 </style>
