@@ -5,7 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_redis import FlaskRedis
 from urllib.parse import quote
 
-from config import *
+from backend_AI.config import *
 
 redis = FlaskRedis()  # 延迟初始化模式
 db = SQLAlchemy()
