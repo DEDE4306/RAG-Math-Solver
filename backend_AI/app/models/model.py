@@ -68,8 +68,8 @@ class User(db.Model):
 
 
 class RoleEnum(Enum):
-    USER = 'user'
-    ASSISTANT = 'assistant'
+    user = 'user'
+    assistant = 'assistant'
 
 
 class Session(db.Model):

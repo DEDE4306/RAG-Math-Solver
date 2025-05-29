@@ -6,14 +6,16 @@ import os
 from datetime import datetime
 from flask import Blueprint,request,jsonify
 from ..llm.qwen_client import QwenClient
-from ..utils.ai import chat_completion
-from ..utils.auth import token_required, verify_token
+from ..utils.ai import chat_completion, compress_messages
+from ..utils.auth import token_required, verify_token, get_user_id
 from ..utils.response import flask_response
 from ..utils.ocr import BaiduOCRClient
 from ..models.db import db
-from ..models.model import Session, Message
+from ..models.model import Session, Message, RoleEnum
 from pathlib import Path
 from config import api_key
+
+MAX_HISTORY = 4
 
 
 chat = Blueprint('chat', __name__, url_prefix='/api/chat') # 创建一个聊天蓝图
@@ -35,9 +37,9 @@ def save_message_db(sessionid, content, role):
 def create_new_session():
     data = request.get_json()
     content = data.get("content")
-    token = request.headers.get('Authorization')
-    user_id = verify_token(token)
-    result = chat_completion(content)
+    user_id = get_user_id()
+    message = [{"role": "user", "content": content}]
+    result = chat_completion(message)
     if result is False:
         return flask_response(code=500, message=f'ai服务器异常')
 
@@ -52,14 +54,14 @@ def create_new_session():
 
     msg1 = Message(
         content=content,
-        role="user",
+        role='user',
         sessionid=session.sessionid,
         createdat=datetime.now(),
     )
 
     msg2 = Message(
         content=result,
-        role="assistant",
+        role='assistant',
         sessionid=session.sessionid,
         createdat=datetime.now(),
     )
@@ -82,13 +84,23 @@ def create_new_session():
 @chat.route('/sendMessage',methods=['POST'])
 @token_required
 def send_message():
-    # try:
+    try:
         # 获取数据
         data = request.get_json()
         content = data.get('content')
         sessionid = data.get('sessionid')
 
-        result = chat_completion(content)
+
+        message = Message.query.filter_by(sessionid=sessionid).all()
+        messages = [{"role": msg.role.value, "content": msg.content} for msg in message]
+        messages.append({"role": "user", "content": content})
+        messages = messages[-MAX_HISTORY:]
+        messages = compress_messages(messages)
+
+        result = chat_completion(messages)
+
+        if result is None:
+            return flask_response(code=500, message=f'ai服务器异常')
 
         save_message_db(sessionid, content, "user")
         msg2 = save_message_db(sessionid, result, "assistant")
@@ -103,12 +115,61 @@ def send_message():
         return flask_response(code=200, message='消息发送成功', data=data)
 
 
-    # except Exception as e:
-    #     return jsonify({
-    #         "success": False,
-    #         "msg": f"服务异常：{str(e)}",
-    #         "response": {}
-    #     })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "msg": f"服务异常：{str(e)}",
+            "response": {}
+        })
+
+@chat.route('/getMessageListBySessionid/<sessionid>', methods=['GET'])
+@token_required
+def get_messgae(sessionid):
+    message = Message.query.filter_by(sessionid=sessionid).all()
+    messages = [{"role": msg.role.value, "content": msg.content, "messageid": msg.messageid,
+                 "createdat": msg.createdat.strftime("%Y-%m-%d %H:%M:%S")} for msg in message]
+
+    return flask_response(code=200, message=f'返回所有的会话消息成功', data=messages)
+
+
+@chat.route('/getHistoricalSessions', methods=['GET'])
+@token_required
+def get_history_session():
+    session = Session.query.all()
+    messages = [{"sessionid": msg.sessionid, "title": msg.title} for msg in session]
+
+    return flask_response(code=200, message=f'返回所有的会话列表成功', data=messages)
+
+
+@chat.route('/editHistoricalMessage/<messageid>', methods=['PUT'])
+@token_required
+def edit_hostory_message(messageid):
+    data = request.get_json()
+    content = data.get("content")
+
+    message1 = Message.query.filter_by(messageid=int(messageid)).first()
+    sessionid = message1.sessionid
+
+    # 更新
+    message1.content = content
+
+    # 删除下面的消息
+    Message.query.filter(Message.sessionid == sessionid, Message.messageid > int(messageid)).delete()
+    db.session.commit()
+
+    message = Message.query.filter(Message.sessionid == sessionid, Message.messageid <= int(messageid)).all()
+    messages = [{"role": msg.role.value, "content": msg.content} for msg in message]
+    messages = compress_messages(messages)
+    result = chat_completion(messages)
+    if result is False:
+        return flask_response(code=500, message=f'ai服务器异常')
+
+    save_message_db(sessionid, result, "assistant")
+    new_message = Message.query.filter_by(sessionid=sessionid).all()
+    messages = [{"role": msg.role.value, "content": msg.content, "messageid": msg.messageid,
+                 "createdat": msg.createdat.strftime("%Y-%m-%d %H:%M:%S")} for msg in new_message]
+
+    return flask_response(code=200, message=f'返回当前会话消息列表成功', data=messages)
 
 
 @chat.route('/ocr', methods=['POST'])

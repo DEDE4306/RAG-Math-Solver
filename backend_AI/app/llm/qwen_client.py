@@ -5,19 +5,27 @@ class QwenClient:
         self.api_key = api_key
         self.base_url="https://dashscope.aliyuncs.com/compatible-mode/v1"  # 填写DashScope服务的base_url
 
-    def chat(self, prompt):
+    def chat(self, messages):
+        """
+        messages: List[Dict]，每条包含 'role' 和 'content'，如：
+        [
+            {"role": "system", "content": "你是一个精通数学的AI..."},
+            {"role": "user", "content": "请解释勾股定理"},
+            {"role": "assistant", "content": "勾股定理是..."},
+            {"role": "user", "content": "它的应用有哪些？"}
+        ]
+        """
         client = OpenAI(
             api_key=self.api_key,  # 使用的 api_key
             base_url=self.base_url,  # 填写DashScope服务的base_url
         )
         completion = client.chat.completions.create(
             model="qwen-math-plus",
-            messages=[
-                {'role': 'system', 'content': '你是一个精通数学的 AI，现在需要你为同学或老师解决小学到高中的数学问题'},
-                {'role': 'user', 'content': prompt}]
+            messages=messages
             # stream = True,  # 开启流式输出
         )
         answer = completion.choices[0].message.content
+        print("====模型回复====")
         print(answer) # 返回纯文本内容
         return answer
 

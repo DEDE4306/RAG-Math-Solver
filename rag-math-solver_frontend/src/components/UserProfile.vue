@@ -230,7 +230,8 @@
 }
 .username {
   font-size: 18px; /* 增大字体 */
-  color: #333;
+  font-weight: bold;
+  color: whitesmoke;
   cursor: pointer;
   white-space: nowrap;
   overflow: hidden;

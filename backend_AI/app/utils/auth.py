@@ -37,7 +37,7 @@ def verify_token(token):
         # print(f"verify token:{payload['user_id']}")
         return payload['user_id']
     except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
-        # print(f"verify token:{token}")
+        print(f"verify token:{token}")
         return None
 
 
