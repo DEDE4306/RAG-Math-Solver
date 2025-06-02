@@ -97,7 +97,7 @@ export default {
                 let errorMsg = '网络错误，请重试';
                 if (err.response) {
                     if (err.response.status === 401) {
-                        errorMsg = '登录已过期，请重新登录';
+                        errorMsg = '暂未登录，请登录';
                         this.$router.push('/login1');
                     } else {
                         errorMsg = `服务器错误: ${err.response.status}`;

@@ -181,39 +181,55 @@ export default {
 
         // 渲染消息内容，处理 Markdown 和 LaTeX
         renderMessage(content) {
-            // 使用 markdown-it 解析 Markdown
-            let htmlContent = this.md.render(content);
+            const latexPlaceholder = '__LATEX__';
+            const latexExpressions = [];
+            let index = 0;
 
-            // 替换 LaTeX 公式
-            // 处理 $$...$$（显示公式）
-            htmlContent = htmlContent.replace(/\$\$([\s\S]*?)\$\$/g, (match, tex) => {
-                try {
-                    return katex.renderToString(tex.trim(), { displayMode: true, throwOnError: false });
-                } catch (e) {
-                    console.error('KaTeX 渲染错误:', e);
-                    return match; // 渲染失败时返回原始内容
-                }
+            // 保护 $...$ 表达式（行内公式）
+            let protectedContent = content.replace(/\$([\s\S]*?)\$/g, (match) => {
+                if (match.startsWith('$$')) return match; // 跳过 $$...$$
+                latexExpressions.push(match);
+                return `${latexPlaceholder}${index++}`;
             });
 
-            // 处理 \(...\)（行内公式）
-            htmlContent = htmlContent.replace(/\\\(([\s\S]*?)\\\)/g, (match, tex) => {
-                try {
-                    return katex.renderToString(tex.trim(), { displayMode: false, throwOnError: false });
-                } catch (e) {
-                    console.error('KaTeX 渲染错误:', e);
-                    return match;
-                }
+            // 保护 $$...$$ 表达式（块级公式）
+            protectedContent = protectedContent.replace(/\$\$([\s\S]*?)\$\$/g, (match) => {
+                latexExpressions.push(match);
+                return `${latexPlaceholder}${index++}`;
             });
 
-            // 处理 $...$（行内公式）
-            htmlContent = htmlContent.replace(/\$([\s\S]*?)\$/g, (match, tex) => {
-                // 避免匹配 $$...$$（防止重复处理）
-                if (match.startsWith('$$')) return match;
+            // 保护 \(...\) 表达式（行内公式）
+            protectedContent = protectedContent.replace(/\\\(([\s\S]*?)\\\)/g, (match) => {
+                latexExpressions.push(match);
+                return `${latexPlaceholder}${index++}`;
+            });
+
+            // 使用 markdown-it 渲染非 LaTeX 部分
+            let htmlContent = this.md.render(protectedContent);
+
+            // 恢复并渲染 LaTeX 表达式
+            latexExpressions.forEach((latex, i) => {
+                let tex = latex;
+                let displayMode = false;
+
+                // 根据 LaTeX 语法类型提取内容
+                if (latex.startsWith('$$') && latex.endsWith('$$')) {
+                    tex = latex.slice(2, -2); // 移除 $$...$$
+                    displayMode = true;
+                } else if (latex.startsWith('\\(') && latex.endsWith('\\)')) {
+                    tex = latex.slice(2, -2); // 移除 \(...\)
+                } else if (latex.startsWith('$') && latex.endsWith('$')) {
+                    tex = latex.slice(1, -1); // 移除 $...$
+                }
+
                 try {
-                    return katex.renderToString(tex.trim(), { displayMode: false, throwOnError: false });
+                    // 使用 katex 渲染 LaTeX
+                    const rendered = katex.renderToString(tex.trim(), { displayMode, throwOnError: false });
+                    htmlContent = htmlContent.replace(`${latexPlaceholder}${i}`, rendered);
                 } catch (e) {
-                    console.error('KaTeX 渲染错误:', e);
-                    return match;
+                    console.error('KaTeX 渲染错误:', e, 'LaTeX 内容:', latex);
+                    // 如果渲染失败，显示原始内容并标记为错误
+                    htmlContent = htmlContent.replace(`${latexPlaceholder}${i}`, `<span class="latex-error">${tex}</span>`);
                 }
             });
 
