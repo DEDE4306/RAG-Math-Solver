@@ -1,60 +1,107 @@
 <template>
-    <div class = "registerContainer">
-        <img
-            src = "@/../public/back.png"
-            class="back-button"
-            @click="goBack"
-            alt="返回"
-        >
-        <h1>注册</h1>
-        <div class="input-group-phone">
-            <label>手机号</label>
-            <input type="text" placeholder="请输入手机号" v-model="phoneNumber"/>
-        </div>
-        <div class="input-group-code">
-            <label>验证码</label>
-            <input type="text" placeholder="请输入验证码" v-model="code"/>
-            <button 
-                class="send-code" 
-                :disabled="isCounting"
-                @click="sendVerificationCode"
-            >
-                {{ buttonText }}
-            </button>
-        </div>
-        <div class="input-group-username">
-            <label>用户名</label>
-            <input type="text" placeholder="请输入用户名" v-model="username"/>
-            <span class="input-hint">20个字符以内</span>
-        </div>
-        <div class="input-group-pw">
-            <label>密码</label>
-            <input type="password" placeholder="请输入密码" v-model="password"/>
-            <span class="input-hint">6-20个字符,<nav></nav>字母+数字</span>
-        </div>
-        <div class="input-group-pw2">
-            <label>确认密码</label>
-            <input type="password" placeholder="请确认密码" v-model="password2"/>
-            <span class="input-hint">6-20个字符,<nav></nav>字母+数字</span>
-        </div>
-        <div class="avatar-upload">
-            <div class="avatar-preview" @click="triggerFileInput">
-                <img 
-                    :src="avatarPreview || require('@/../public/default-avatar.png')" 
-                    class="avatar-image"
-                    alt="头像"
-                >
+    <div class="registerContainer">
+        <div class="form-content">
+            <div class="title-section">
+                <h1>创建账号</h1>
+                <p class="subtitle">加入我们，开始精彩旅程</p>
             </div>
-            <input 
-                type="file" 
-                ref="fileInput"
-                @change="handleAvatarUpload"
-                accept="image/*"
-                style="display: none;"
-            >
-            <a href="javascript:;" class="upload-link" @click="triggerFileInput">上传头像</a>
+            <div class="form-section">
+                <div class="input-wrapper">
+                    <div class="input-group">
+                        <div class="input-icon">📱</div>
+                        <input 
+                            type="text" 
+                            placeholder="请输入手机号" 
+                            v-model="phoneNumber"
+                            class="styled-input"
+                        />
+                    </div>
+                </div>
+                <div class="input-wrapper">
+                    <div class="input-group">
+                        <div class="input-icon">📩</div>
+                        <input 
+                            type="text" 
+                            placeholder="请输入验证码" 
+                            v-model="code"
+                            class="styled-input code-input"
+                        />
+                        <button 
+                            class="send-code" 
+                            :disabled="isCounting"
+                            @click="sendVerificationCode"
+                        >
+                            {{ buttonText }}
+                        </button>
+                    </div>
+                </div>
+                <div class="input-wrapper">
+                    <div class="input-group">
+                        <div class="input-icon">👤</div>
+                        <input 
+                            type="text" 
+                            placeholder="请输入用户名" 
+                            v-model="username"
+                            class="styled-input"
+                        />
+                        <span class="input-hint">20字符内</span>
+                    </div>
+                </div>
+                <div class="input-wrapper">
+                    <div class="input-group">
+                        <div class="input-icon">🔒</div>
+                        <input 
+                            type="password" 
+                            placeholder="请输入密码" 
+                            v-model="password"
+                            class="styled-input"
+                        />
+                        <span class="input-hint">6-20字符</span>
+                    </div>
+                </div>
+                <div class="input-wrapper">
+                    <div class="input-group">
+                        <div class="input-icon">🔐</div>
+                        <input 
+                            type="password" 
+                            placeholder="请确认密码" 
+                            v-model="password2"
+                            class="styled-input"
+                        />
+                        <span class="input-hint">重复密码</span>
+                    </div>
+                </div>
+                <div class="avatar-section">
+                    <div class="avatar-upload">
+                        <div class="avatar-preview" @click="triggerFileInput">
+                            <img 
+                                :src="avatarPreview || require('@/../public/default-avatar.png')" 
+                                class="avatar-image"
+                                alt="头像"
+                            >
+                            <div class="avatar-overlay">
+                                <span></span>
+                            </div>
+                        </div>
+                        <input 
+                            type="file" 
+                            ref="fileInput"
+                            @change="handleAvatarUpload"
+                            accept="image/*"
+                            style="display: none;"
+                        >
+                        <a href="javascript:;" class="upload-link" @click="triggerFileInput">
+                            ✨ 上传头像
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="action-section">
+                <button class="register-button" @click="handleRegister">
+                    <span>立即注册</span>
+                </button>
+            </div>
         </div>
-        <button class="register-button" @click="handleRegister">注册</button>
     </div>
 </template>
 
@@ -277,130 +324,315 @@ export default {
   display: flex;
   flex-direction: column;
   position: relative;
-  align-items: center;
-  padding-bottom: 40px;
-  background-color: #fff;
-  border-radius: 20px;
+  height: 85vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 0;
+  overflow: hidden;
 }
+
+.header-section {
+  padding: 15px 20px;
+  flex-shrink: 0;
+}
+
 .back-button {
   width: 24px;
-  height: 27.24px;
-  cursor: pointer; /* 鼠标悬停时显示手型 */
-  align-self: start;
-  margin-left: 30px;
-  margin-top: 45px;
-  transition: transform 0.2s;
+  height: 24px;
+  cursor: pointer;
+  filter: brightness(0) invert(1);
+  transition: all 0.3s ease;
+  border-radius: 50%;
+  padding: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
 }
-h1
-{
+
+.back-button:hover {
+  transform: translateX(-3px);
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.form-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 15px 20px 20px;
+  background: white;
+  margin: 15px 15px 15px;
+  border-radius: 30px;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.title-section {
   text-align: center;
-  font-size: 40px;
-  margin-top: -12px;
-  margin-bottom: 40px;
+  margin-bottom: 20px;
+  flex-shrink: 0;
 }
-.input-group-phone, .input-group-code, .input-group-username, .input-group-pw, .input-group-pw2 {
+
+.title-section h1 {
+  font-size: 34px;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0 0 6px 0;
+  background: linear-gradient(135deg, #3f51b5, #7498ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  color: #7f8c8d;
+  font-size: 13px;
+  margin: 0;
+  font-weight: 400;
+}
+
+.form-section {
+  width: 100%;
+  max-width: 340px;
+  margin-bottom: 15px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.input-wrapper {
+  margin-bottom: 15px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.input-group {
+  display: flex;
+  align-items: center;
+  background: #f8f9fa;
+  border-radius: 14px;
+  padding: 3px;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  position: relative;
+  width: 90%;
+  min-width: 0;
+}
+
+.input-group:focus-within {
+  border-color: #3f51b5;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(63, 81, 181, 0.1);
+}
+
+.input-icon {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #3f51b5, #7498ff);
+  color: white;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.styled-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 12px 6px;
+  font-size: 14px;
+  color: #2c3e50;
+  outline: none;
+  min-width: 0;
+}
+
+.styled-input::placeholder {
+  color: #bdc3c7;
+}
+
+.code-input {
+  flex: 1;
+}
+
+.input-hint {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 10px;
+  color: #95a5a6;
+  background: white;
+  padding: 2px 6px;
+  border-radius: 6px;
+  white-space: nowrap;
+  border: 1px solid #ecf0f1;
+  z-index: 1;
+}
+
+.send-code {
+  width: 80px;
+  height: 32px;
+  margin-left: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, #3f51b5, #7498ff);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 10px rgba(63, 81, 181, 0.3);
+  flex-shrink: 0;
+}
+
+.send-code:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(63, 81, 181, 0.4);
+}
+
+.send-code:disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.avatar-section {
   display: flex;
   justify-content: center;
-  align-items: center;
-  width: 320px;
-  margin-bottom: 20px;
-  position: relative;
+  margin: 5px 0;
+  flex-shrink: 0;
 }
-.input-group-phone label, .input-group-code label, .input-group-username label, .input-group-pw label, .input-group-pw2 label {
-  width: 70px;
-  text-align: right;
-  margin-right: 10px;
-  font-size: 16px;
-}
-.input-group-phone input, .input-group-code input, .input-group-username input, .input-group-pw input, .input-group-pw2 input {
-  flex: 1;
-  padding: 8px;
-  font-size: 16px;
-  border: 1.5px solid #ccc;
-  border-radius: 4px;
-}
-.input-group-code input {
-  width: 100px;
-}
-.input-group-username input, .input-group-pw input, .input-group-pw2 input {
-  width: 100px; 
-}
-/* 输入框选中时的样式 */
-.input-group-phone input:focus, .input-group-code input:focus, .input-group-username input:focus, .input-group-pw input:focus, .input-group-pw2 input:focus {
-  border-color: #1989fa;
-  outline: none;
-}
-.input-hint {
-    left: 100%;
-    margin-left: 5px;
-    align-items: center;
-    white-space: nowrap;
-    font-size: 12px;
-    color: #999;
-    width: auto;
-}
-.send-code {
-  width: 100px;
-  height: 32px;
-  margin-left: 8px;
-  font-size: 16px;
-  color: #fff;
-  background: linear-gradient(to bottom right, #3f51b5, #7498ff); 
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: opacity 0.3s ease;
-}
-.send-code:disabled {
-  background: #ccc !important;
-  cursor: not-allowed;
-  opacity: 0.7;
-}
+
 .avatar-upload {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
+
 .avatar-preview {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    overflow: hidden;
-    cursor: pointer;
-    background-color: #f0f0f0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: none;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: pointer;
+  background: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #3f51b5;
+  transition: all 0.3s ease;
+  position: relative;
+  margin-bottom: 8px;
 }
+
+.avatar-preview:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(63, 81, 181, 0.3);
+}
+
 .avatar-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
-.upload-link {
-  color: #1989fa;
-  text-decoration: underline;
-  font-size: 14px;
-  cursor: pointer;
-}
-.upload-link:hover {
-  color: #0056b3; /* 悬停时颜色变深，可选 */
-}
-.register-button {
-  margin-top: 0px;
-  margin-bottom: 10px;
-  width: 138px;
-  height: 46px;
-  padding: 10px 0;
-  font-size: 20px;
-  font-weight: bolder;
-  color: #fff;
-  background: linear-gradient(to bottom right, #3f51b5, #7498ff); 
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+
+.avatar-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(63, 81, 181, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
   transition: opacity 0.3s ease;
+  font-size: 20px;
+}
+
+.avatar-preview:hover .avatar-overlay {
+  opacity: 1;
+}
+
+.upload-link {
+  color: #3f51b5;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.upload-link:hover {
+  color: #7498ff;
+  transform: translateY(-1px);
+}
+
+.action-section {
+  width: 100%;
+  max-width: 340px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.register-button {
+  width: 100%;
+  max-width: 240px;
+  height: 46px;
+  font-size: 16px;
+  font-weight: 700;
+  color: white;
+  background: linear-gradient(135deg, #3f51b5, #7498ff);
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 16px rgba(63, 81, 181, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.register-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(63, 81, 181, 0.3);
+}
+
+.register-button:active {
+  transform: translateY(-1px);
+}
+
+.register-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.register-button:hover::before {
+  left: 100%;
+}
+
+/* 响应式优化 */
+@media (max-width: 480px) {
+  .form-content {
+    margin: 0 10px 10px;
+    padding: 12px 15px 15px;
+  }
+  
+  .form-section {
+    max-width: 100%;
+  }
 }
 </style>
