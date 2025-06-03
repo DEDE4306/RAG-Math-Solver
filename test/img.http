@@ -1,0 +1,10 @@
+GET http://localhost:5000/api/account/img/1.png
+Accept: application/json
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNCwiZXhwIjoxNzQ2NjEyNTI3fQ.SirrM4_yiEwTz4VPkKrb6eroys-n6sWjOCEYtUigfyg
+
+###
+
+
+
+
+
