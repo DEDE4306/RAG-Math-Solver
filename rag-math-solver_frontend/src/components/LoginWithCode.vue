@@ -1,33 +1,54 @@
 <template>
-    <div class = "loginContainer">
-        <img
-            src = "@/../public/back.png"
-            class="back-button"
-            @click="goBack"
-            alt="返回"
-        >
-        <h1>登录</h1>
-        <div class="input-group">
-            <label>手机号</label>
-            <input type="text" placeholder="请输入手机号" v-model="phoneNumber"/>
+    <div class="loginContainer">
+        <div class="form-content">
+            <div class="title-section">
+                <h1>欢迎登录</h1>
+                <p class="subtitle">验证码快速登录</p>
+            </div>
+            <div class="form-section">
+                <div class="input-wrapper">
+                    <div class="input-group">
+                        <div class="input-icon">📱</div>
+                        <input 
+                            type="text" 
+                            placeholder="请输入手机号" 
+                            v-model="phoneNumber"
+                            class="styled-input"
+                        />
+                    </div>
+                </div>
+                <div class="input-wrapper">
+                    <div class="input-group-2">
+                        <div class="input-icon">🔐</div>
+                        <input 
+                            type="text" 
+                            placeholder="请输入验证码" 
+                            v-model="code"
+                            class="styled-input code-input"
+                        />
+                        <button 
+                            class="send-code" 
+                            :disabled="isCounting"
+                            @click="sendVerificationCode"
+                        >
+                            {{ buttonText }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="action-section">
+                <div class="link-group1">
+                    <a href="/login1" class="link">🔑 密码登录</a>
+                </div>
+                <button class="login-button" @click="handleLogin">
+                    <span>登录</span>
+                </button>
+                <div class="register-link">
+                    <span>还没有账号？</span>
+                    <a href="/register" class="link highlight">立即注册</a>
+                </div>
+            </div>
         </div>
-        <div class="input-group-2">
-            <label>验证码</label>
-            <input type="text" placeholder="请输入验证码" v-model="code"/>
-            <button 
-                class="send-code" 
-                :disabled="isCounting"
-                @click="sendVerificationCode"
-            >
-                {{ buttonText }}
-            </button>
-        </div>
-        <div class="link-group1">
-            <!--a href="/forgot-password" class="link">忘记密码</a-->
-            <a href="/login1" class="link">密码登录</a>
-        </div>
-        <button class="login-button" @click="handleLogin">登录</button>
-        <a href="/register" class="link">没有账号？前往注册</a>
     </div>    
 </template>
 
@@ -124,7 +145,7 @@ export default {
                     console.log('username:', response.data.response.username);
                     // 将 Token 存储在 localStorage
                     localStorage.setItem("token", response.data.response.token);
-                    this.$router.push('/chat')
+                    this.$router.push('/')
                 } else {
                     alert('登录失败: ' + response.data.msg);
                 }
@@ -159,100 +180,234 @@ export default {
   display: flex;
   flex-direction: column;
   position: relative;
-  align-items: center;
-  padding-bottom: 40px;
-  background-color: #fff;
-  border-radius: 20px;
+  min-height: 75vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 0;
 }
+
+.header-section {
+  padding: 20px 30px;
+}
+
 .back-button {
-  width: 24px;
-  height: 27.24px;
-  cursor: pointer; /* 鼠标悬停时显示手型 */
-  align-self: start;
-  margin-left: 30px;
-  margin-top: 45px;
-  transition: transform 0.2s;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  filter: brightness(0) invert(1);
+  transition: all 0.3s ease;
+  border-radius: 50%;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
 }
-h1
-{
+
+.back-button:hover {
+  transform: translateX(-3px);
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.form-content {
+  height: 100px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 40px 60px;
+  background: white;
+  margin: 20px;
+  border-radius: 30px;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.title-section {
   text-align: center;
-  font-size: 40px;
-  margin-top: -12px;
   margin-bottom: 40px;
 }
+
+.title-section h1 {
+  font-size: 40px;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0 0 8px 0;
+  background: linear-gradient(135deg, #3f51b5, #7498ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  color: #7f8c8d;
+  font-size: 16px;
+  margin: 0;
+  font-weight: 400;
+}
+
+.form-section {
+  width: 100%;
+  max-width: 350px;
+  margin-bottom: 30px;
+}
+
+.input-wrapper {
+  margin-bottom: 24px;
+}
+
 .input-group, .input-group-2 {
   display: flex;
-  justify-content: center;
   align-items: center;
-  width: 300px;
-  margin-bottom: 20px;
+  background: #f8f9fa;
+  border-radius: 16px;
+  padding: 4px;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  position: relative;
 }
-.input-group label, .input-group-2 label {
-  width: 60px;
-  text-align: right;
-  margin-right: 10px;
-  font-size: 16px;
+
+.input-group:focus-within, .input-group-2:focus-within {
+  border-color: #3f51b5;
+  background: white;
+  box-shadow: 0 0 0 4px rgba(63, 81, 181, 0.1);
 }
-.input-group input, .input-group-2 input {
+
+.input-icon {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #3f51b5, #7498ff);
+  color: white;
+  margin-right: 12px;
+}
+
+.styled-input {
   flex: 1;
-  padding: 8px;
-  font-size: 16px;
-  border: 1.5px solid #ccc;
-  border-radius: 4px;
-}
-.input-group-2 input {
-  width: 100px;
-}
-.send-code {
-  width: 100px;
-  height: 32px;
-  margin-left: 8px;
-  font-size: 16px;
-  color: #fff;
-  background: linear-gradient(to bottom right, #3f51b5, #7498ff); 
   border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: opacity 0.3s ease;
-}
-.send-code:disabled {
-  background: #ccc !important;
-  cursor: not-allowed;
-  opacity: 0.7;
-}
-/* 输入框选中时的样式 */
-.input-group input:focus, .input-group-2 input:focus {
-  border-color: #1989fa;
+  background: transparent;
+  padding: 16px 8px;
+  font-size: 16px;
+  color: #2c3e50;
   outline: none;
 }
-.link-group1 {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  margin-top: 5px;
+
+.styled-input::placeholder {
+  color: #bdc3c7;
 }
-.link {
-  color: #1989fa;
-  text-decoration: underline;
+
+.code-input {
+  max-width: 140px;
+}
+
+.send-code {
+  width: 110px;
+  height: 40px;
+  margin-left: 8px;
   font-size: 14px;
-  cursor: pointer;
-}
-.link:hover {
-  color: #0056b3; /* 悬停时颜色变深，可选 */
-}
-.login-button {
-  margin-top: 10px;
-  margin-bottom: 10px;
-  width: 138px;
-  height: 46px;
-  padding: 10px 0;
-  font-size: 20px;
-  font-weight: bolder;
-  color: #fff;
-  background: linear-gradient(to bottom right, #3f51b5, #7498ff); 
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, #3f51b5, #7498ff);
   border: none;
-  border-radius: 5px;
+  border-radius: 12px;
   cursor: pointer;
-  transition: opacity 0.3s ease;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(63, 81, 181, 0.3);
+}
+
+.send-code:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(63, 81, 181, 0.4);
+}
+
+.send-code:disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.action-section {
+  width: 100%;
+  max-width: 350px;
+  text-align: center;
+}
+
+.link-group1 {
+  margin-bottom: 24px;
+}
+
+.link {
+  color: #3f51b5;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.link:hover {
+  color: #7498ff;
+  transform: translateY(-1px);
+}
+
+.login-button {
+  width: 100%;
+  max-width: 280px;
+  height: 52px;
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+  background: linear-gradient(135deg, #3f51b5, #7498ff);
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 20px rgba(63, 81, 181, 0.3);
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 24px rgba(63, 81, 181, 0.4);
+}
+
+.login-button:active {
+  transform: translateY(-1px);
+}
+
+.login-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.login-button:hover::before {
+  left: 100%;
+}
+
+.register-link {
+  color: #7f8c8d;
+  font-size: 14px;
+}
+
+.register-link .highlight {
+  color: #e74c3c;
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+.register-link .highlight:hover {
+  color: #c0392b;
 }
 </style>

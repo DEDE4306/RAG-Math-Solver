@@ -2,9 +2,12 @@
     <div class="history-sidebar">
         <!-- 顶部系统名称 -->
         <div class="sidebar-header">
-            <h1>Math Solver</h1>
+            <div class="header-content">
+                <h1>MathSage</h1>
+                <img src="../assets/logo1.png" alt="Logo" class="header-logo">
+            </div>
             <div class="header-decoration"></div>
-        </div>      
+        </div>    
         
         <!-- 开始新对话按钮 -->
         <div class="new-chat-btn" @click="startNewChat">
@@ -97,15 +100,14 @@ export default {
                 let errorMsg = '网络错误，请重试';
                 if (err.response) {
                     if (err.response.status === 401) {
-                        errorMsg = '登录已过期，请重新登录';
+                        errorMsg = '暂未登录，请登录';
                         this.$router.push('/login1');
-                    } else {
-                        errorMsg = `服务器错误: ${err.response.status}`;
+                        alert(errorMsg);
                     }
                 } else if (err.request) {
                     errorMsg = '无法连接到服务器';
+                    alert(errorMsg);
                 }
-                alert(errorMsg);
                 console.error('获取历史记录错误:', err);
             } finally {
                 this.loading = false;
@@ -216,15 +218,36 @@ export default {
     100% { transform: translateX(100%); }
 }
 
+.header-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    position: relative;
+    z-index: 1;
+}
+
 .sidebar-header h1 {
     margin: 0;
     font-size: 32px;
     font-weight: 700;
     color: white;
     text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-    position: relative;
-    z-index: 1;
     letter-spacing: -0.5px;
+    line-height: 1;
+}
+
+.header-logo {
+    height: 40px;
+    width: auto;
+    object-fit: contain;
+    opacity: 0.9;
+    transition: all 0.3s ease;
+}
+
+.header-logo:hover {
+    opacity: 1;
+    transform: scale(1.05);
 }
 
 .header-decoration {
@@ -416,8 +439,16 @@ export default {
         width: 280px;
     }
     
-    .sidebar-header {
-        padding: 20px 15px;
+    .sidebar-header h1 {
+        font-size: 28px;
+    }
+    
+    .header-logo {
+        height: 35px;
+    }
+    
+    .header-content {
+        gap: 10px;
     }
     
     .sidebar-header h1 {
