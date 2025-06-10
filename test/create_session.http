@@ -1,0 +1,11 @@
+POST http://127.0.0.1:5000/api/chat/createNewSession
+Content-Type: application/json
+Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoxLCJleHAiOjE3NDgwNzgzMzJ9.iC1j_sEeBGnioOCaNh9WtWFhoq9rWybEkUR34jMse4c
+
+{
+  "content":"你好"
+}
+
+
+
+
