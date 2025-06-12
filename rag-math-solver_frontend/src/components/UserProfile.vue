@@ -141,7 +141,7 @@
           this.avatarUrl = require('@/../public/default-avatar.png');
           if (error.response?.status === 401) {
             localStorage.removeItem('token');
-            this.$router.push('/login');
+            this.$router.push('/login1');
           }
         }
         console.log('fetchUserInfo final state:', { isLoggedIn: this.isLoggedIn });
