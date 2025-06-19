@@ -1,3 +1,14 @@
-backend_AI/.env
-__pycache__/
-*.pyc
+# Python bytecode
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+
+# VSCode / PyCharm / IDE files
+.vscode/
+.idea/
+
+# Virtual environments
+.venv/
+
+# Environment variables
+*.env
