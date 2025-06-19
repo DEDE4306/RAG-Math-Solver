@@ -27,4 +27,4 @@ for i in range(0, len(ds), chunk_size):
               quoting=csv.QUOTE_ALL,
               escapechar='\\')
 
-print("✅ 所有分块CSV导出完成！")
+print("所有分块CSV导出完成！")
