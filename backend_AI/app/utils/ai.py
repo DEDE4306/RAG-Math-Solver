@@ -1,5 +1,5 @@
-# services/llm.py
 # -*- coding: utf-8 -*-
+# services/llm.py
 from ..llm.qwen_client import QwenClient
 from ..rag.embedder import Embedder
 from ..rag.faiss_indexer import FaissIndexer

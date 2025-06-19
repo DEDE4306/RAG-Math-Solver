@@ -52,11 +52,7 @@ def save_message_db(sessionid, content, role):
 @token_required
 def create_new_session():
     """
-       创建新会话接口
-       - 接收用户输入的首条消息内容
-       - 调用 AI 生成回复
-       - 创建会话及消息记录
-       - 返回会话信息及消息列表
+       创建新会话接口：接收用户输入的首条消息内容，调用 AI 生成回复
     """
     data = request.get_json()
     content = data.get("content")
@@ -112,12 +108,7 @@ def create_new_session():
 @token_required
 def send_message():
     """
-       发送消息接口
-       - 获取用户消息和会话ID
-       - 查询该会话历史消息，截取最近MAX_HISTORY条并压缩
-       - 调用 AI 生成回复
-       - 保存用户消息和AI回复消息
-       - 返回 AI 回复消息给前端
+       发送消息接口：获取用户消息和会话ID，返回 AI 回复消息给前端
     """
     try:
         data = request.get_json()
@@ -161,7 +152,6 @@ def send_message():
 def get_messgae(sessionid):
     """
         根据会话ID获取该会话的所有消息
-
         :param sessionid: 会话ID
         :return: 会话消息列表
     """
@@ -215,12 +205,7 @@ def edit_hostory_message(messageid):
 @chat.route('/ocr', methods=['POST'])
 def ocr_extract():
     """
-        图片OCR文字识别接口
-        - 接收上传图片文件
-        - 校验文件格式
-        - 保存文件到服务器
-        - 调用百度OCR接口识别图片文字
-        - 返回识别文本
+        图片OCR文字识别接口，调用百度OCR接口识别图片文字，返回识别文本
         请求文件参数名: file
         支持格式: jpg, jpeg, png, gif, bmp
     """

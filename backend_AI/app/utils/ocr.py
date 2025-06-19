@@ -26,7 +26,7 @@ class BaiduOCRClient:
         return response.json().get("access_token")
 
     @staticmethod
-    def image_to_base64(image_path, urlencoded=False):
+    def image_to_base64(image_path, urlencoded = False):
         """
         :param image_path: 文件路径
         :return: base64 编码信息

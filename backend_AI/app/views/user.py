@@ -47,7 +47,6 @@ def register():
     if len(password) < 6 or len(password) > 20:
         return flask_response(code=400, message=f'密码长度应在6-20个字符之间')
 
-    # TODO: 验证码校验逻辑（实际项目需要实现）
     if not PhoneCode.check_code(phone, code):
         return flask_response(code=400, message=f'验证码错误')
 
@@ -152,9 +151,6 @@ def loginWithPassword():
 @token_required
 def getBasicUserInfo():
     """获取基本用户信息"""
-    # token = request.headers.get('Authorization')
-    # print("the token is {}".format(token))
-    # user_id = verify_token(token)
     user_id = get_user_id()
     # print(f"[DEBUG] Parsed user_id from token: {user_id}")
     user = User.query.filter_by(id=user_id).first()

@@ -1,6 +1,6 @@
-# utils/auth.py
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# utils/auth.py
 import random
 import string
 from datetime import datetime, timedelta
@@ -50,27 +50,6 @@ def get_user_id():
     return user_id
 
 
-# def token_required(func):
-#     @wraps(func)
-#     def wrapper(*args, **kwargs):
-#         # print(request.headers)
-#         token = request.headers.get('Authorization')
-#         # print("token:", token)
-#         user_id = get_user_id()
-#         _token = LoginToken.get_token(user_id)
-#         if _token != token:
-#             return flask_response(code=401, message=f'token已过期')
-#         if not token:
-#             return flask_response(code=401, message=f'无token')
-#         user_id = verify_token(token)
-#         if not user_id:
-#             return flask_response(code=401, message=f'失效的token')
-#         if kwargs:
-#             return func(**kwargs)
-#
-#         return func()
-#
-#     return wrapper
 def token_required(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
