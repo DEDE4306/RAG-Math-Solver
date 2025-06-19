@@ -11,4 +11,4 @@
 .venv/
 
 # Environment variables
-*.env
+*/.env

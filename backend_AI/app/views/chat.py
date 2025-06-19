@@ -1,11 +1,21 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # views/chat.py
+"""
+Chat Blueprint 相关接口实现
+功能包括：
+- 新建会话
+- 发送消息
+- 获取会话消息列表
+- 获取历史会话列表
+- 编辑历史消息
+- 图片OCR文字识别
+"""
+
 import uuid
 import os
 from datetime import datetime
 from flask import Blueprint,request,jsonify
-from ..llm.qwen_client import QwenClient
 from ..utils.ai import chat_completion, compress_messages
 from ..utils.auth import token_required, verify_token, get_user_id
 from ..utils.response import flask_response
@@ -13,14 +23,20 @@ from ..utils.ocr import BaiduOCRClient
 from ..models.db import db
 from ..models.model import Session, Message, RoleEnum
 from pathlib import Path
-from config import api_key
 
-MAX_HISTORY = 4
+MAX_HISTORY = 4 # 最大历史消息条数，用于限制上下文长度
 
-
+# 创建聊天蓝图，前缀为 /api/chat
 chat = Blueprint('chat', __name__, url_prefix='/api/chat') # 创建一个聊天蓝图
 
 def save_message_db(sessionid, content, role):
+    """
+       保存一条消息到数据库
+       :param sessionid: 会话ID
+       :param content: 消息内容
+       :param role: 消息角色（'user' 或 'assistant'）
+       :return: 保存的 Message 对象
+    """
     msg = Message(
         content=content,
         role=role,
@@ -35,11 +51,21 @@ def save_message_db(sessionid, content, role):
 @chat.route('/createNewSession', methods=['POST'])
 @token_required
 def create_new_session():
+    """
+       创建新会话接口
+       - 接收用户输入的首条消息内容
+       - 调用 AI 生成回复
+       - 创建会话及消息记录
+       - 返回会话信息及消息列表
+    """
     data = request.get_json()
     content = data.get("content")
     user_id = get_user_id()
+
+    # 构造消息格式，便于模型调用
     message = [{"role": "user", "content": content}]
     result = chat_completion(message)
+
     if result is False:
         return flask_response(code=500, message=f'ai服务器异常')
 
@@ -52,6 +78,7 @@ def create_new_session():
     db.session.add(session)
     db.session.commit()
 
+    # 保存用户消息和AI回复消息
     msg1 = Message(
         content=content,
         role='user',
@@ -84,13 +111,20 @@ def create_new_session():
 @chat.route('/sendMessage',methods=['POST'])
 @token_required
 def send_message():
+    """
+       发送消息接口
+       - 获取用户消息和会话ID
+       - 查询该会话历史消息，截取最近MAX_HISTORY条并压缩
+       - 调用 AI 生成回复
+       - 保存用户消息和AI回复消息
+       - 返回 AI 回复消息给前端
+    """
     try:
-        # 获取数据
         data = request.get_json()
         content = data.get('content')
         sessionid = data.get('sessionid')
 
-
+        # 查询会话历史消息，构造上下文
         message = Message.query.filter_by(sessionid=sessionid).all()
         messages = [{"role": msg.role.value, "content": msg.content} for msg in message]
         messages.append({"role": "user", "content": content})
@@ -105,7 +139,7 @@ def send_message():
         save_message_db(sessionid, content, "user")
         msg2 = save_message_db(sessionid, result, "assistant")
 
-        # 返回前端
+        # 返回AI回复
         data = {
             "messageid":msg2.messageid,
             "role":msg2.role.value,
@@ -125,6 +159,12 @@ def send_message():
 @chat.route('/getMessageListBySessionid/<sessionid>', methods=['GET'])
 @token_required
 def get_messgae(sessionid):
+    """
+        根据会话ID获取该会话的所有消息
+
+        :param sessionid: 会话ID
+        :return: 会话消息列表
+    """
     message = Message.query.filter_by(sessionid=sessionid).all()
     messages = [{"role": msg.role.value, "content": msg.content, "messageid": msg.messageid,
                  "createdat": msg.createdat.strftime("%Y-%m-%d %H:%M:%S")} for msg in message]
@@ -174,6 +214,16 @@ def edit_hostory_message(messageid):
 
 @chat.route('/ocr', methods=['POST'])
 def ocr_extract():
+    """
+        图片OCR文字识别接口
+        - 接收上传图片文件
+        - 校验文件格式
+        - 保存文件到服务器
+        - 调用百度OCR接口识别图片文字
+        - 返回识别文本
+        请求文件参数名: file
+        支持格式: jpg, jpeg, png, gif, bmp
+    """
     if 'file' not in request.files:
         return flask_response(code=400, message='缺少上传文件')
 

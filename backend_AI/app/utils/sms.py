@@ -28,6 +28,7 @@ def send_sms(phone_number, code):
     try:
         # 发送请求
         response = client.send_sms(send_request)
+        print(response)
         if response.body.code == 'OK':
             print("短信发送成功")
             return True
